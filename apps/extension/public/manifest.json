@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "WishHub",
+  "version": "0.1.0",
+  "description": "Universal Wishlist Platform",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "permissions": ["activeTab", "storage"]
+}

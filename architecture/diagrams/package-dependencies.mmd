@@ -1,0 +1,52 @@
+graph TD
+    WEB[apps/web] --> UI[packages/ui]
+    WEB --> AUTH[packages/auth]
+    WEB --> DB[packages/database]
+    WEB --> WL[packages/wishlist]
+    WEB --> CAT[packages/catalog]
+    WEB --> ENV[packages/env]
+    WEB --> API[packages/api-client]
+
+    EXT[apps/extension] --> SCR[packages/scraper]
+    EXT --> SDK[packages/sdk]
+    EXT --> API
+    EXT --> ENV
+
+    MOB[apps/mobile] --> API
+    MOB --> ENV
+    MOB --> WL
+    MOB --> CAT
+
+    DOCS[apps/docs] --> UI
+    DOCS --> ENV
+
+    WL --> DB
+    WL --> CORE[packages/core]
+    WL --> TYPES[packages/types]
+    WL --> CON[packages/contracts]
+
+    CAT --> DB
+    CAT --> CORE
+    CAT --> TYPES
+    CAT --> CON
+
+    SCR --> TYPES
+
+    API --> SDK
+    API --> TYPES
+
+    SDK --> CON
+    SDK --> TYPES
+
+    AUTH --> DB
+
+    DB --> CONF[packages/config]
+    UI --> CONF
+    UI --> UTILS[packages/utils]
+
+    CORE --> TYPES
+    CON --> TYPES
+    CON --> ZOD[zod]
+
+    ENV --> ZOD
+    ENV --> T3[t3-env]

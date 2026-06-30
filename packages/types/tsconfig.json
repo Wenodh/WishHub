@@ -1,0 +1,5 @@
+{
+  "extends": "@wishhub/config/typescript/base.json",
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}

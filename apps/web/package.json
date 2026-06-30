@@ -1,0 +1,40 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@wishhub/api-client": "workspace:*",
+    "@wishhub/auth": "workspace:*",
+    "@wishhub/catalog": "workspace:*",
+    "@wishhub/constants": "workspace:*",
+    "@wishhub/contracts": "workspace:*",
+    "@wishhub/database": "workspace:*",
+    "@wishhub/env": "workspace:*",
+    "@wishhub/sdk": "workspace:*",
+    "@wishhub/types": "workspace:*",
+    "@wishhub/ui": "workspace:*",
+    "@wishhub/utils": "workspace:*",
+    "@wishhub/wishlist": "workspace:*",
+    "next": "15.0.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@wishhub/config": "workspace:*",
+    "@types/node": "^22.9.0",
+    "@types/react": "19.0.0",
+    "@types/react-dom": "19.0.0",
+    "eslint": "^9.15.0",
+    "typescript": "^5.6.3",
+    "tailwindcss": "^3.4.15",
+    "postcss": "^8.4.49",
+    "autoprefixer": "^10.4.20"
+  }
+}

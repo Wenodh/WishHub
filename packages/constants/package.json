@@ -1,0 +1,11 @@
+{
+  "name": "@wishhub/constants",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "devDependencies": {
+    "@wishhub/config": "workspace:*",
+    "typescript": "^5.6.3"
+  }
+}

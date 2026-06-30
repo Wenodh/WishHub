@@ -1,0 +1,16 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "pnpm build",
+  "ignore-step": "git diff --quiet HEAD^ HEAD .",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    }
+  ]
+}

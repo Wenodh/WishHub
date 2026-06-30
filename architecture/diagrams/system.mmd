@@ -1,0 +1,62 @@
+graph TD
+    subgraph Clients
+        Web[apps/web - Next.js]
+        Mobile[apps/mobile - Expo]
+        Ext[apps/extension - Vite]
+        Docs[apps/docs - Fumadocs]
+    end
+
+    subgraph "Domain Layer"
+        WL[packages/wishlist]
+        CAT[packages/catalog]
+        SCR[packages/scraper]
+        JOBS[packages/jobs]
+        AI[packages/ai]
+        NOTIF[packages/notifications]
+    end
+
+    subgraph "Infrastructure Layer"
+        DB[packages/database - Prisma]
+        STR[packages/storage - Supabase]
+        RT[packages/realtime - Supabase]
+        AUTH[packages/auth - Better Auth]
+        ENV[packages/env - t3-env]
+        TEL[packages/telemetry]
+        CORE[packages/core - DDD Primitives]
+    end
+
+    subgraph "API & SDK Layer"
+        SDK[packages/sdk]
+        API[packages/api-client - TanStack Query]
+        CON[packages/contracts - Zod]
+    end
+
+    subgraph "Shared Tooling"
+        UI[packages/ui - ShadCN]
+        UTILS[packages/utils]
+        CONST[packages/constants]
+        TYPES[packages/types]
+        CONF[packages/config]
+    end
+
+    Ext --> SCR
+    Ext --> SDK
+    Web --> WL
+    Web --> CAT
+    Web --> UI
+    Web --> API
+    Mobile --> WL
+    Mobile --> CAT
+    Mobile --> API
+
+    WL --> DB
+    CAT --> DB
+    AUTH --> DB
+    SDK --> CON
+    API --> SDK
+
+    WL --> CORE
+    CAT --> CORE
+
+    All --- ENV
+    All --> TEL

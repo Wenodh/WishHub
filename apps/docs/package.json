@@ -1,0 +1,30 @@
+{
+  "name": "docs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3001",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@wishhub/env": "workspace:*",
+    "@wishhub/ui": "workspace:*",
+    "fumadocs-ui": "latest",
+    "fumadocs-core": "latest",
+    "next": "15.0.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@wishhub/config": "workspace:*",
+    "@types/node": "^22.9.0",
+    "@types/react": "19.0.0",
+    "@types/react-dom": "19.0.0",
+    "eslint": "^9.15.0",
+    "typescript": "^5.6.3",
+    "tailwindcss": "^3.4.15"
+  }
+}
