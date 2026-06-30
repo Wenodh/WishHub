@@ -1,4 +1,9 @@
-export interface DomainProduct {
+export interface ProductImage {
+  url: string;
+  type?: string | null;
+}
+
+export interface ProductEntity {
   id: string;
   userId: string;
   name: string;
@@ -8,10 +13,7 @@ export interface DomainProduct {
   price?: number | null;
   currency?: string | null;
   storeName?: string | null;
-  images: Array<{
-    url: string;
-    type?: string | null;
-  }>;
+  images: ProductImage[];
   rawMetadata?: any;
   metadataVersion: number;
   createdAt: Date;

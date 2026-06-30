@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
 /**
- * Extraction DTO: Output of the scraper
+ * Extraction Result: Output of the scraper logic
  */
-export const ExtractionSchema = z.object({
+export const ExtractionResultSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
   price: z.number().optional(),
@@ -14,58 +14,99 @@ export const ExtractionSchema = z.object({
   storeName: z.string().optional(),
   rawMetadata: z.record(z.any()).optional(),
   confidence: z.number().min(0).max(1).default(0),
-  source: z.string().optional(),
+  source: z.enum(['json-ld', 'opengraph', 'twitter', 'meta', 'manual']),
+  missingFields: z.array(z.string()).default([]),
 });
 
-export type ExtractionDTO = z.infer<typeof ExtractionSchema>;
+export type ExtractionResult = z.infer<typeof ExtractionResultSchema>;
 
 /**
- * Create Product DTO: Input for the API
+ * Create Product Request: Input for the POST /api/products endpoint
  */
-export const CreateProductSchema = z.object({
+export const CreateProductRequestSchema = z.object({
   name: z.string().min(1),
   url: z.string().url(),
-  imageUrl: z.string().url().optional(),
-  images: z.array(z.string().url()).optional(),
+  imageUrl: z.string().url().optional(), // Primary image
+  images: z.array(z.string().url()).optional(), // All extracted images
   price: z.number().optional(),
   currency: z.string().optional(),
   storeName: z.string().optional(),
   description: z.string().optional(),
   rawMetadata: z.record(z.any()).optional(),
-  metadataVersion: z.number().default(1),
+  metadataVersion: z.number().int().default(1),
 });
 
-export type CreateProductDTO = z.infer<typeof CreateProductSchema>;
+export type CreateProductRequest = z.infer<typeof CreateProductRequestSchema>;
 
 /**
- * Product Response DTO: Output of the API
+ * Product Response: Canonical product DTO
  */
 export const ProductResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
   url: z.string(),
   canonicalUrl: z.string(),
-  imageUrl: z.string().optional(),
   images: z.array(z.object({
     url: z.string().url(),
     type: z.string().optional(),
-  })).default([]),
+  })),
   price: z.number().optional(),
   currency: z.string().optional(),
   storeName: z.string().optional(),
   description: z.string().optional(),
-  createdAt: z.string(), // ISO Date
-  updatedAt: z.string(), // ISO Date
+  createdAt: z.string(), // ISO String
+  updatedAt: z.string(), // ISO String
 });
 
-export type ProductResponseDTO = z.infer<typeof ProductResponseSchema>;
+export type ProductResponse = z.infer<typeof ProductResponseSchema>;
 
 /**
- * Pagination DTO
+ * Create Product Response
  */
-export const PaginationSchema = z.object({
-  limit: z.number().min(1).max(100).default(50),
-  cursor: z.string().optional(),
+export const CreateProductResponseSchema = z.object({
+  product: ProductResponseSchema,
 });
 
-export type PaginationDTO = z.infer<typeof PaginationSchema>;
+export type CreateProductResponse = z.infer<typeof CreateProductResponseSchema>;
+
+/**
+ * Delete Product Response
+ */
+export const DeleteProductResponseSchema = z.object({
+  success: z.boolean(),
+});
+
+export type DeleteProductResponse = z.infer<typeof DeleteProductResponseSchema>;
+
+/**
+ * List Products Response (Paginated)
+ */
+export const ListProductsResponseSchema = z.object({
+  products: z.array(ProductResponseSchema),
+  nextCursor: z.string().optional(),
+});
+
+export type ListProductsResponse = z.infer<typeof ListProductsResponseSchema>;
+
+/**
+ * Validation Error Response
+ */
+export const ValidationErrorResponseSchema = z.object({
+  error: z.literal('Validation Failed'),
+  issues: z.array(z.object({
+    path: z.array(z.union([z.string(), z.number()])),
+    message: z.string(),
+  })),
+});
+
+export type ValidationErrorResponse = z.infer<typeof ValidationErrorResponseSchema>;
+
+/**
+ * Generic API Error Response
+ */
+export const ApiErrorResponseSchema = z.object({
+  error: z.string(),
+  code: z.string().optional(),
+});
+
+export type ApiErrorResponse = z.infer<typeof ApiErrorResponseSchema>;
