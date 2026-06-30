@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -12,34 +13,37 @@ model User {
   email         String    @unique
   name          String?
   image         String?
-  wishlists     Wishlist[]
+  products      SavedProduct[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
 
-model Wishlist {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
-  name        String
-  description String?
-  isPublic    Boolean   @default(false)
-  products    Product[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+model SavedProduct {
+  id              String         @id @default(cuid())
+  userId          String
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  url             String
+  canonicalUrl    String
+  name            String
+  description     String?
+  price           Float?
+  currency        String?
+  storeName       String?
+  images          ProductImage[]
+  rawMetadata     Json?
+  metadataVersion Int            @default(1)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@unique([userId, canonicalUrl])
+  @@index([userId])
 }
 
-model Product {
-  id          String    @id @default(cuid())
-  wishlistId  String
-  wishlist    Wishlist  @relation(fields: [wishlistId], references: [id])
-  url         String
-  name        String
-  description String?
-  price       Float?
-  currency    String?
-  imageUrl    String?
-  storeName   String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+model ProductImage {
+  id             String       @id @default(cuid())
+  productId      String
+  product        SavedProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url            String
+  type           String?      @default("original")
+  createdAt      DateTime     @default(now())
 }

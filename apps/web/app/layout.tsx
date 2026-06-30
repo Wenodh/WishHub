@@ -1,5 +1,6 @@
 import { type Metadata } from "next";
 import "@wishhub/ui/styles/globals.css";
+import { QueryProvider } from "../providers/query-provider";
 
 export const metadata: Metadata = {
   title: "WishHub",
@@ -13,7 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <QueryProvider>
+          {children}
+        </QueryProvider>
+      </body>
     </html>
   );
 }
