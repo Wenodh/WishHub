@@ -1,7 +1,6 @@
 {
   "framework": "nextjs",
   "buildCommand": "pnpm build",
-  "ignore-step": "git diff --quiet HEAD^ HEAD .",
   "headers": [
     {
       "source": "/(.*)",
