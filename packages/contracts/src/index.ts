@@ -70,6 +70,16 @@ export const CreateProductResponseSchema = z.object({
 export type CreateProductResponse = z.infer<typeof CreateProductResponseSchema>;
 
 /**
+ * Pagination Schema
+ */
+export const PaginationSchema = z.object({
+  limit: z.number().int().min(1).max(100).default(20),
+  cursor: z.string().optional(),
+});
+
+export type Pagination = z.infer<typeof PaginationSchema>;
+
+/**
  * Delete Product Response
  */
 export const DeleteProductResponseSchema = z.object({

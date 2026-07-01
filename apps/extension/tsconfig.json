@@ -1,5 +1,5 @@
 {
-  "extends": "@wishhub/config/typescript/base.json",
+  "extends": "@wishhub/config/typescript/base",
   "compilerOptions": {
     "jsx": "react-jsx",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],

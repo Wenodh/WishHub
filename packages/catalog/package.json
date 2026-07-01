@@ -6,7 +6,9 @@
   "types": "./src/index.ts",
   "dependencies": {
     "@wishhub/contracts": "workspace:*",
+    "@wishhub/core": "workspace:^",
     "@wishhub/database": "workspace:*",
+    "@wishhub/telemetry": "workspace:^",
     "@wishhub/types": "workspace:*"
   },
   "devDependencies": {

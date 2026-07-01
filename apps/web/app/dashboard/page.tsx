@@ -39,9 +39,9 @@ export default function DashboardPage() {
         {products.map((product) => (
           <div key={product.id} className="border rounded-lg overflow-hidden flex flex-col bg-card">
             <div className="aspect-square relative bg-muted">
-              {product.imageUrl && (
+              {product.images?.[0]?.url && (
                 <img
-                  src={product.imageUrl}
+                  src={product.images[0].url}
                   alt={product.name}
                   className="object-cover w-full h-full"
                 />

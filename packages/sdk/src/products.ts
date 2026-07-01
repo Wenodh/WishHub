@@ -1,9 +1,9 @@
-import { type CreateProductDTO, type ProductResponseDTO } from '@wishhub/contracts';
+import { type CreateProductRequest, type ProductResponse } from '@wishhub/contracts';
 
 export class ProductSDK {
   constructor(private baseUrl: string) {}
 
-  async save(data: CreateProductDTO): Promise<ProductResponseDTO> {
+  async save(data: CreateProductRequest): Promise<ProductResponse> {
     const res = await fetch(`${this.baseUrl}/api/products`, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -13,7 +13,7 @@ export class ProductSDK {
     return res.json();
   }
 
-  async list(params?: { limit?: number; cursor?: string }): Promise<ProductResponseDTO[]> {
+  async list(params?: { limit?: number; cursor?: string }): Promise<ProductResponse[]> {
     const query = new URLSearchParams();
     if (params?.limit) query.set('limit', params.limit.toString());
     if (params?.cursor) query.set('cursor', params.cursor);

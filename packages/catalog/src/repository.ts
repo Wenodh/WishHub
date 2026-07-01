@@ -47,7 +47,7 @@ export class ProductRepository {
       include: { images: true },
     });
 
-    return products.map(p => this.mapToDomain(p));
+    return products.map((p: any) => this.mapToDomain(p));
   }
 
   async delete(id: string, userId: string): Promise<void> {
