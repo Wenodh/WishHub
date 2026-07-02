@@ -6,7 +6,7 @@
     "dev": "next dev --port 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -14,7 +14,7 @@
     "@wishhub/ui": "workspace:*",
     "fumadocs-ui": "latest",
     "fumadocs-core": "latest",
-    "next": "15.2.3",
+    "next": "16.2.10",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },
