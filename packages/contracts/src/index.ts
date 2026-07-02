@@ -14,9 +14,11 @@ export const ExtractionResultSchema = z.object({
   storeName: z.string().optional(),
   rawMetadata: z.record(z.any()).optional(),
   confidence: z.number().min(0).max(1).default(0),
-  source: z.enum(['json-ld', 'opengraph', 'twitter', 'meta', 'manual']),
+  source: z.enum(['json-ld', 'opengraph', 'twitter', 'meta', 'manual', 'amazon']),
   missingFields: z.array(z.string()).default([]),
 });
+
+export type ExtractionDTO = z.infer<typeof ExtractionResultSchema>;
 
 export type ExtractionResult = z.infer<typeof ExtractionResultSchema>;
 
@@ -91,12 +93,12 @@ export type DeleteProductResponse = z.infer<typeof DeleteProductResponseSchema>;
 /**
  * List Products Response (Paginated)
  */
-export const ListProductsResponseSchema = z.object({
+export const ProductListResponseSchema = z.object({
   products: z.array(ProductResponseSchema),
   nextCursor: z.string().optional(),
 });
 
-export type ListProductsResponse = z.infer<typeof ListProductsResponseSchema>;
+export type ProductListResponse = z.infer<typeof ProductListResponseSchema>;
 
 /**
  * Validation Error Response

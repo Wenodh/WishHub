@@ -18,3 +18,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **UI**: Established `@wishhub/ui` design system with core components.
 - **Applications**: Initialized apps for Web (Next.js), Docs (Fumadocs), Extension (Vite), and Mobile (Expo).
 - **Architecture**: Comprehensive documentation including ADRs, roadmap, and technical debt register.
+
+## [0.2.0] - 2025-07-02
+
+### Added
+- **Milestone 1A**: First end-to-end vertical slice completed.
+- **Extension**: Full Amazon product extraction and saving flow.
+- **Dashboard**: Web dashboard for viewing and deleting saved products.
+- **API**: Standardized product endpoints with session and Zod validation.
+- **Persistence**: Implemented `SavedProduct` repository and services.
+
+### Changed
+- **Framework**: Upgraded Next.js to **v16.2.10** to resolve security vulnerabilities (CVE-2025-29927).
+- **Tooling**: Standardized React versions and ESLint configurations across the monorepo.

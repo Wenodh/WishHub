@@ -12,7 +12,6 @@ export class OpenGraphParser extends BaseParser {
     return {
       name,
       description: getMeta('og:description') || undefined,
-      imageUrl: getMeta('og:image') || undefined,
       images: getMeta('og:image') ? [getMeta('og:image')!] : [],
       storeName: getMeta('og:site_name') || undefined,
       url: getMeta('og:url') || window.location.href,

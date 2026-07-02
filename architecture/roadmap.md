@@ -9,9 +9,9 @@ The evolution of WishHub from foundation to production-grade SaaS.
 - Minimal Design System (UI)
 - Architecture documentation (ADRs, Diagrams)
 
-## Phase 1: Vertical Slice
+## Phase 1: Vertical Slice (COMPLETED - Milestone 1A)
 - Browser Extension popup & background
-- Scraper core with generic parser
+- Scraper core with generic parser & Amazon adapter
 - Authentication flow (Web & Extension)
 - Save product end-to-end (Extension -> API -> DB)
 - Minimal Web Dashboard (View/Delete products)

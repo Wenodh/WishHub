@@ -3,7 +3,7 @@ import { type ExtractionDTO } from '@wishhub/contracts';
 export interface ExtractionResult {
   product: ExtractionDTO;
   confidence: number;
-  source: 'json-ld' | 'opengraph' | 'twitter' | 'meta' | 'manual';
+  source: 'json-ld' | 'opengraph' | 'twitter' | 'meta' | 'manual' | 'amazon';
   missingFields: string[];
 }
 

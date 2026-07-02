@@ -6,10 +6,12 @@
   "types": "./src/index.ts",
   "dependencies": {
     "@wishhub/contracts": "workspace:^",
-    "@wishhub/types": "workspace:*"
+    "@wishhub/types": "workspace:*",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@wishhub/config": "workspace:*",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^4.1.9"
   }
 }

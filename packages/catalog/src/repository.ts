@@ -8,7 +8,7 @@ export class ProductRepository {
       data: {
         userId: data.userId,
         name: data.name,
-        url: data.url,
+        originalUrl: data.url,
         canonicalUrl: data.canonicalUrl,
         description: data.description,
         price: data.price,
@@ -58,23 +58,23 @@ export class ProductRepository {
 
   private mapToDomain(dbProduct: any): ProductEntity {
     return {
-      id: dbProduct.id,
-      userId: dbProduct.userId,
-      name: dbProduct.name,
-      url: dbProduct.url,
-      canonicalUrl: dbProduct.canonicalUrl,
-      description: dbProduct.description,
-      price: dbProduct.price,
-      currency: dbProduct.currency,
-      storeName: dbProduct.storeName,
-      images: dbProduct.images.map((img: any) => ({
-        url: img.url,
-        type: img.type,
+      id: dbProduct.id as string,
+      userId: dbProduct.userId as string,
+      name: dbProduct.name as string,
+      originalUrl: dbProduct.originalUrl as string,
+      canonicalUrl: dbProduct.canonicalUrl as string,
+      description: dbProduct.description as string | null,
+      price: dbProduct.price as number | null,
+      currency: dbProduct.currency as string | null,
+      storeName: dbProduct.storeName as string | null,
+      images: (dbProduct.images as any[]).map((img) => ({
+        url: img.url as string,
+        type: img.type as string | null,
       })),
       rawMetadata: dbProduct.rawMetadata,
-      metadataVersion: dbProduct.metadataVersion,
-      createdAt: dbProduct.createdAt,
-      updatedAt: dbProduct.updatedAt,
+      metadataVersion: dbProduct.metadataVersion as number,
+      createdAt: dbProduct.createdAt as Date,
+      updatedAt: dbProduct.updatedAt as Date,
     };
   }
 }
