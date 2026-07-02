@@ -24,7 +24,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (!products || products.length === 0) {
+  if (!products || products.products.length === 0) {
     return (
       <div className="p-8 text-center text-muted-foreground">
         No products saved yet. Use the extension to save your first product!
@@ -36,12 +36,12 @@ export default function DashboardPage() {
     <div className="p-8 max-w-7xl mx-auto">
       <h1 className="text-3xl font-bold mb-8">My Saved Products</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {products.map((product) => (
+        {products.products.map((product) => (
           <div key={product.id} className="border rounded-lg overflow-hidden flex flex-col bg-card">
             <div className="aspect-square relative bg-muted">
-              {product.imageUrl && (
+              {product.images?.[0]?.url && (
                 <img
-                  src={product.imageUrl}
+                  src={product.images[0].url}
                   alt={product.name}
                   className="object-cover w-full h-full"
                 />

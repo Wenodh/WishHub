@@ -6,10 +6,11 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.101.2",
     "@wishhub/api-client": "workspace:*",
     "@wishhub/auth": "workspace:*",
     "@wishhub/catalog": "workspace:*",
@@ -22,19 +23,22 @@
     "@wishhub/ui": "workspace:*",
     "@wishhub/utils": "workspace:*",
     "@wishhub/wishlist": "workspace:*",
-    "next": "15.0.3",
+    "better-auth": "^1.6.22",
+    "lucide-react": "^0.460.0",
+    "next": "16.2.10",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },
   "devDependencies": {
-    "@wishhub/config": "workspace:*",
     "@types/node": "^22.9.0",
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",
+    "@wishhub/config": "workspace:*",
+    "autoprefixer": "^10.4.20",
     "eslint": "^9.15.0",
-    "typescript": "^5.6.3",
-    "tailwindcss": "^3.4.15",
     "postcss": "^8.4.49",
-    "autoprefixer": "^10.4.20"
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.6.3",
+    "vitest": "^4.1.9"
   }
 }

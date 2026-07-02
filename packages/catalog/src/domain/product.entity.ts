@@ -7,7 +7,7 @@ export interface ProductEntity {
   id: string;
   userId: string;
   name: string;
-  url: string;
+  originalUrl: string;
   canonicalUrl: string;
   description?: string | null;
   price?: number | null;

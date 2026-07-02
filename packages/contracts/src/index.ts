@@ -14,9 +14,11 @@ export const ExtractionResultSchema = z.object({
   storeName: z.string().optional(),
   rawMetadata: z.record(z.any()).optional(),
   confidence: z.number().min(0).max(1).default(0),
-  source: z.enum(['json-ld', 'opengraph', 'twitter', 'meta', 'manual']),
+  source: z.enum(['json-ld', 'opengraph', 'twitter', 'meta', 'manual', 'amazon']),
   missingFields: z.array(z.string()).default([]),
 });
+
+export type ExtractionDTO = z.infer<typeof ExtractionResultSchema>;
 
 export type ExtractionResult = z.infer<typeof ExtractionResultSchema>;
 
@@ -70,6 +72,16 @@ export const CreateProductResponseSchema = z.object({
 export type CreateProductResponse = z.infer<typeof CreateProductResponseSchema>;
 
 /**
+ * Pagination Schema
+ */
+export const PaginationSchema = z.object({
+  limit: z.number().int().min(1).max(100).default(20),
+  cursor: z.string().optional(),
+});
+
+export type Pagination = z.infer<typeof PaginationSchema>;
+
+/**
  * Delete Product Response
  */
 export const DeleteProductResponseSchema = z.object({
@@ -81,12 +93,12 @@ export type DeleteProductResponse = z.infer<typeof DeleteProductResponseSchema>;
 /**
  * List Products Response (Paginated)
  */
-export const ListProductsResponseSchema = z.object({
+export const ProductListResponseSchema = z.object({
   products: z.array(ProductResponseSchema),
   nextCursor: z.string().optional(),
 });
 
-export type ListProductsResponse = z.infer<typeof ListProductsResponseSchema>;
+export type ProductListResponse = z.infer<typeof ProductListResponseSchema>;
 
 /**
  * Validation Error Response

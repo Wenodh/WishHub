@@ -1,32 +1,54 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@wishhub/auth';
-import { saveProductService, productRepository } from '@wishhub/catalog';
-import { CreateProductSchema, PaginationSchema } from '@wishhub/contracts';
+import { saveProductService, listProductsService } from '@wishhub/catalog';
+import { CreateProductRequestSchema, PaginationSchema } from '@wishhub/contracts';
 
-export async function GET(req: Request) {
+export async function GET(req: Request): Promise<NextResponse> {
   const session = await auth.api.getSession({ headers: req.headers });
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
-  const { limit, cursor } = PaginationSchema.parse({
+  const paginationResult = PaginationSchema.safeParse({
     limit: Number(searchParams.get('limit')) || undefined,
     cursor: searchParams.get('cursor') || undefined,
   });
 
-  const products = await productRepository.list({ userId: session.user.id, limit, cursor });
-  return NextResponse.json(products);
+  if (!paginationResult.success) {
+    return NextResponse.json({ error: 'Invalid pagination parameters' }, { status: 400 });
+  }
+
+  const result = await listProductsService.execute(session.user.id, paginationResult.data);
+
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error }, { status: 500 });
+  }
+
+  return NextResponse.json({ products: result.value });
 }
 
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<NextResponse> {
   const session = await auth.api.getSession({ headers: req.headers });
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
     const body = await req.json();
-    const data = CreateProductSchema.parse(body);
-    const product = await saveProductService.execute(session.user.id, data);
-    return NextResponse.json(product, { status: 201 });
+    const validationResult = CreateProductRequestSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      return NextResponse.json({
+        error: 'Validation Failed',
+        issues: validationResult.error.issues
+      }, { status: 400 });
+    }
+
+    const result = await saveProductService.execute(session.user.id, validationResult.data);
+
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
+
+    return NextResponse.json({ product: result.value }, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

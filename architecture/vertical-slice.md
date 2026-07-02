@@ -1,4 +1,4 @@
-# Milestone 1: Vertical Slice Architecture
+# Milestone 1: Vertical Slice Architecture (Milestone 1A COMPLETED)
 
 This document describes the request, data, and authentication lifecycles for the first end-to-end vertical slice: saving a product from the browser extension and viewing it in the web dashboard.
 

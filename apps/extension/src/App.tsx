@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { WishHubSDK } from '@wishhub/sdk'
 import { type ExtractionResult } from '@wishhub/scraper'
 
-const sdk = new WishHubSDK(import.meta.env.VITE_API_URL || 'http://localhost:3000')
+const sdk = new WishHubSDK((import.meta as any).env.VITE_API_URL || 'http://localhost:3000')
 
 type State = 'idle' | 'extracting' | 'preview' | 'saving' | 'saved' | 'error'
 
@@ -36,7 +36,17 @@ function App() {
     if (!result) return
     setState('saving')
     try {
-      await sdk.products.save(result.product)
+      await sdk.products.save({
+        name: result.product.name,
+        url: result.product.url,
+        images: result.product.images,
+        price: result.product.price,
+        currency: result.product.currency,
+        storeName: result.product.storeName,
+        description: result.product.description,
+        rawMetadata: result.product.rawMetadata,
+        metadataVersion: 1,
+      })
       setState('saved')
     } catch (err: any) {
       setError(err.message)
@@ -67,8 +77,8 @@ function App() {
     return (
       <div className="p-4 w-72">
         <h1 className="font-bold text-lg mb-2 line-clamp-2">{result.product.name}</h1>
-        {result.product.imageUrl && (
-          <img src={result.product.imageUrl} className="w-full aspect-square object-cover rounded mb-4" />
+        {result.product.images?.[0] && (
+          <img src={result.product.images[0]} className="w-full aspect-square object-cover rounded mb-4" />
         )}
         <div className="flex justify-between items-center mb-4">
           <span className="text-muted-foreground">{result.product.storeName}</span>
@@ -78,10 +88,10 @@ function App() {
         </div>
         <button
           onClick={save}
-          disabled={state === 'saving'}
+          disabled={state === ('saving' as any)}
           className="w-full bg-black text-white py-2 rounded font-bold"
         >
-          {state === 'saving' ? 'Saving...' : 'Save to WishHub'}
+          {state === ('saving' as any) ? 'Saving...' : 'Save to WishHub'}
         </button>
       </div>
     )

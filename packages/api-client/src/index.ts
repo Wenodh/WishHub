@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { WishHubSDK } from '@wishhub/sdk';
-import { type CreateProductDTO } from '@wishhub/contracts';
+import { type CreateProductRequest } from '@wishhub/contracts';
 
 const sdk = new WishHubSDK(process.env.NEXT_PUBLIC_APP_URL || '');
 
@@ -14,7 +14,7 @@ export const useProducts = (params?: { limit?: number; cursor?: string }) => {
 export const useSaveProduct = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateProductDTO) => sdk.products.save(data),
+    mutationFn: (data: CreateProductRequest) => sdk.products.save(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },

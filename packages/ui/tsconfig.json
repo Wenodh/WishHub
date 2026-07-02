@@ -1,5 +1,5 @@
 {
-  "extends": "@wishhub/config/typescript/react-library.json",
+  "extends": "@wishhub/config/typescript/react-library",
   "compilerOptions": {
     "outDir": "dist",
     "strictNullChecks": true

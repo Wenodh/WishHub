@@ -12,7 +12,6 @@ export class JsonLdParser extends BaseParser {
           return {
             name: product.name,
             description: product.description,
-            imageUrl: Array.isArray(product.image) ? product.image[0] : product.image,
             images: Array.isArray(product.image) ? product.image : (product.image ? [product.image] : []),
             price: product.offers?.price ? parseFloat(product.offers.price) : undefined,
             currency: product.offers?.priceCurrency,
