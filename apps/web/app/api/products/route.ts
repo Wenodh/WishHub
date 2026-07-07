@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@wishhub/auth';
-import { saveProductService, listProductsService } from '@wishhub/catalog';
+import {
+  saveProductService,
+  listProductsService,
+  urlNormalizerService,
+  productRepository
+} from '@wishhub/catalog';
 import { CreateProductRequestSchema, PaginationSchema } from '@wishhub/contracts';
 
 export async function GET(req: Request): Promise<NextResponse> {
@@ -41,14 +46,29 @@ export async function POST(req: Request): Promise<NextResponse> {
       }, { status: 400 });
     }
 
+    // Duplicate Check
+    const canonicalUrl = urlNormalizerService.normalize(validationResult.data.url);
+    const existing = await productRepository.findByCanonicalUrl(session.user.id, canonicalUrl);
+
+    if (existing) {
+        return NextResponse.json({
+            product: existing,
+            duplicate: true
+        }, { status: 201 });
+    }
+
     const result = await saveProductService.execute(session.user.id, validationResult.data);
 
     if (!result.ok) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    return NextResponse.json({ product: result.value }, { status: 201 });
+    return NextResponse.json({
+        product: result.value,
+        duplicate: false
+    }, { status: 201 });
   } catch (error: any) {
+    console.error('API Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -1,8 +1,9 @@
-export const logger = {
-  info: (message: string, ...args: any[]) =>
-    console.log(`[INFO] ${message}`, ...args),
-  error: (message: string, ...args: any[]) =>
-    console.error(`[ERROR] ${message}`, ...args),
-  warn: (message: string, ...args: any[]) =>
-    console.warn(`[WARN] ${message}`, ...args),
-};
+import { DefaultTelemetry, ConsoleLogger } from './providers/default';
+
+export * from './types';
+export * from './providers/default';
+
+export const telemetry = new DefaultTelemetry(new ConsoleLogger('default'));
+
+// For backwards compatibility
+export const logger = telemetry.logger;

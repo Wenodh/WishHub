@@ -5,6 +5,18 @@ import { urlNormalizerService } from '../services/url-normalizer.service';
 
 vi.mock('../repository');
 vi.mock('../services/url-normalizer.service');
+vi.mock('@wishhub/telemetry', () => ({
+  telemetry: {
+    logger: {
+      info: vi.fn(),
+      error: vi.fn(),
+    },
+    track: vi.fn(),
+    errorReporting: {
+      captureException: vi.fn(),
+    }
+  }
+}));
 
 describe('SaveProductService', () => {
   let service: SaveProductService;

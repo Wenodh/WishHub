@@ -8,14 +8,20 @@
     "@wishhub/contracts": "workspace:*",
     "@wishhub/core": "workspace:^",
     "@wishhub/database": "workspace:*",
+    "@wishhub/scraper": "workspace:^",
     "@wishhub/telemetry": "workspace:^",
     "@wishhub/types": "workspace:*"
   },
   "devDependencies": {
+    "@types/node": "^22.9.0",
     "@vitest/coverage-v8": "^4.1.9",
     "@wishhub/config": "workspace:*",
     "typescript": "^5.6.3",
     "vite": "^8.1.3",
     "vitest": "^4.1.9"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   }
 }

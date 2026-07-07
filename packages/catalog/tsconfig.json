@@ -1,0 +1,8 @@
+{
+  "extends": "./node_modules/@wishhub/config/typescript/base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}

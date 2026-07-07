@@ -1,9 +1,47 @@
 import { z } from 'zod';
 
 /**
+ * Extraction Product: Standardized product data extracted from a page
+ */
+export const ExtractionProductSchema = z.object({
+  title: z.string().min(1),
+  brand: z.string().optional(),
+  store: z.string().optional(),
+  canonicalUrl: z.string().url().optional(),
+  originalUrl: z.string().url(),
+  images: z.array(z.string().url()).default([]),
+  price: z.number().optional(),
+  currency: z.string().optional(),
+  availability: z.enum(['in-stock', 'out-of-stock', 'pre-order', 'unknown']).default('unknown'),
+  rating: z.number().min(0).max(5).optional(),
+  reviewCount: z.number().int().min(0).optional(),
+  category: z.string().optional(),
+  breadcrumbs: z.array(z.string()).default([]),
+  asin: z.string().optional(),
+  description: z.string().optional(),
+  rawMetadata: z.record(z.any()).optional(),
+});
+
+export type ExtractionProduct = z.infer<typeof ExtractionProductSchema>;
+
+/**
  * Extraction Result: Output of the scraper logic
  */
 export const ExtractionResultSchema = z.object({
+  product: ExtractionProductSchema,
+  confidence: z.number().min(0).max(1).default(0),
+  extractionSource: z.array(z.string()).default([]),
+  missingFields: z.array(z.string()).default([]),
+  warnings: z.array(z.string()).default([]),
+});
+
+export type ExtractionResult = z.infer<typeof ExtractionResultSchema>;
+
+/**
+ * Backwards compatibility for Milestone 1A
+ * @deprecated Use ExtractionResult
+ */
+export const ExtractionDTOSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
   price: z.number().optional(),
@@ -14,13 +52,11 @@ export const ExtractionResultSchema = z.object({
   storeName: z.string().optional(),
   rawMetadata: z.record(z.any()).optional(),
   confidence: z.number().min(0).max(1).default(0),
-  source: z.enum(['json-ld', 'opengraph', 'twitter', 'meta', 'manual', 'amazon']),
+  source: z.string(),
   missingFields: z.array(z.string()).default([]),
 });
 
-export type ExtractionDTO = z.infer<typeof ExtractionResultSchema>;
-
-export type ExtractionResult = z.infer<typeof ExtractionResultSchema>;
+export type ExtractionDTO = z.infer<typeof ExtractionDTOSchema>;
 
 /**
  * Create Product Request: Input for the POST /api/products endpoint
@@ -67,6 +103,7 @@ export type ProductResponse = z.infer<typeof ProductResponseSchema>;
  */
 export const CreateProductResponseSchema = z.object({
   product: ProductResponseSchema,
+  duplicate: z.boolean().optional(),
 });
 
 export type CreateProductResponse = z.infer<typeof CreateProductResponseSchema>;
