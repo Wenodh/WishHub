@@ -5,43 +5,40 @@ import { prisma } from '@wishhub/database';
 vi.mock('@wishhub/database', () => ({
   prisma: {
     savedProduct: {
-      create: vi.fn(),
+      findFirst: vi.fn(),
       findUnique: vi.fn(),
-      findMany: vi.fn(),
-      delete: vi.fn(),
     },
   },
 }));
 
 describe('ProductRepository', () => {
-  let repo: ProductRepository;
+  let repository: ProductRepository;
 
   beforeEach(() => {
-    repo = new ProductRepository();
+    repository = new ProductRepository();
     vi.clearAllMocks();
   });
 
   it('should find product by canonical url', async () => {
-    const mockProduct = {
-      id: '1',
-      userId: 'u1',
-      name: 'P1',
-      url: 'url',
-      canonicalUrl: 'curl',
-      images: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      metadataVersion: 1,
-    };
+    const userId = 'user-1';
+    const canonicalUrl = 'https://example.com/p1';
+    const mockProduct = { id: '1', userId, catalogProduct: { canonicalUrl } };
 
-    vi.mocked(prisma.savedProduct.findUnique).mockResolvedValue(mockProduct as any);
+    vi.mocked(prisma.savedProduct.findFirst).mockResolvedValue(mockProduct as any);
 
-    const result = await repo.findByCanonicalUrl('u1', 'curl');
+    const result = await repository.findByCanonicalUrl(userId, canonicalUrl);
 
-    expect(result?.id).toBe('1');
-    expect(prisma.savedProduct.findUnique).toHaveBeenCalledWith({
-      where: { userId_canonicalUrl: { userId: 'u1', canonicalUrl: 'curl' } },
-      include: { images: true },
+    expect(result).toEqual(mockProduct);
+    expect(prisma.savedProduct.findFirst).toHaveBeenCalledWith({
+      where: {
+        userId,
+        catalogProduct: { canonicalUrl },
+      },
+      include: {
+        catalogProduct: {
+          include: { images: true },
+        },
+      },
     });
   });
 });

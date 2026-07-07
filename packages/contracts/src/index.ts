@@ -38,34 +38,120 @@ export const ExtractionResultSchema = z.object({
 export type ExtractionResult = z.infer<typeof ExtractionResultSchema>;
 
 /**
- * Backwards compatibility for Milestone 1A
- * @deprecated Use ExtractionResult
+ * Catalog Product: Global product data
  */
-export const ExtractionDTOSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
-  price: z.number().optional(),
-  currency: z.string().optional(),
-  url: z.string().url(),
-  canonicalUrl: z.string().url().optional(),
-  images: z.array(z.string().url()).default([]),
-  storeName: z.string().optional(),
-  rawMetadata: z.record(z.any()).optional(),
-  confidence: z.number().min(0).max(1).default(0),
-  source: z.string(),
-  missingFields: z.array(z.string()).default([]),
+export const CatalogProductSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  canonicalUrl: z.string(),
+  description: z.string().optional().nullable(),
+  brand: z.string().optional().nullable(),
+  storeName: z.string().optional().nullable(),
+  price: z.number().optional().nullable(),
+  currency: z.string().optional().nullable(),
+  images: z.array(z.object({
+    url: z.string().url(),
+    type: z.string().optional().nullable(),
+  })),
 });
 
-export type ExtractionDTO = z.infer<typeof ExtractionDTOSchema>;
+export type CatalogProduct = z.infer<typeof CatalogProductSchema>;
 
 /**
- * Create Product Request: Input for the POST /api/products endpoint
+ * Saved Product: User-specific product reference
+ */
+export const SavedProductSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  catalogProductId: z.string(),
+  catalogProduct: CatalogProductSchema,
+  notes: z.string().optional().nullable(),
+  archived: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type SavedProduct = z.infer<typeof SavedProductSchema>;
+
+/**
+ * Wishlist Summary: Lightweight wishlist DTO
+ */
+export const WishlistSummarySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  isDefault: z.boolean(),
+  itemCount: z.number().int(),
+  updatedAt: z.string(),
+});
+
+export type WishlistSummary = z.infer<typeof WishlistSummarySchema>;
+
+/**
+ * Wishlist Detail: Wishlist with all items
+ */
+export const WishlistDetailSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  isDefault: z.boolean(),
+  items: z.array(z.object({
+    id: z.string(),
+    addedAt: z.string(),
+    savedProduct: SavedProductSchema,
+  })),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type WishlistDetail = z.infer<typeof WishlistDetailSchema>;
+
+/**
+ * Pagination Schema
+ */
+export const PaginationSchema = z.object({
+    limit: z.number().int().min(1).max(100).default(20),
+    cursor: z.string().optional(),
+});
+
+export type Pagination = z.infer<typeof PaginationSchema>;
+
+/**
+ * Create Wishlist Request
+ */
+export const CreateWishlistRequestSchema = z.object({
+  name: z.string().min(1).max(50),
+  isDefault: z.boolean().optional(),
+});
+
+export type CreateWishlistRequest = z.infer<typeof CreateWishlistRequestSchema>;
+
+/**
+ * Update Wishlist Request
+ */
+export const UpdateWishlistRequestSchema = z.object({
+  name: z.string().min(1).max(50).optional(),
+  isDefault: z.boolean().optional(),
+});
+
+export type UpdateWishlistRequest = z.infer<typeof UpdateWishlistRequestSchema>;
+
+/**
+ * Add Product to Wishlist Request
+ */
+export const AddProductRequestSchema = z.object({
+  extraction: ExtractionProductSchema,
+  wishlistId: z.string().optional(), // If not provided, save to default/last used
+});
+
+export type AddProductRequest = z.infer<typeof AddProductRequestSchema>;
+
+/**
+ * Legacy Create Product Request (Backwards compatibility)
  */
 export const CreateProductRequestSchema = z.object({
   name: z.string().min(1),
   url: z.string().url(),
-  imageUrl: z.string().url().optional(), // Primary image
-  images: z.array(z.string().url()).optional(), // All extracted images
+  imageUrl: z.string().url().optional(),
+  images: z.array(z.string().url()).optional(),
   price: z.number().optional(),
   currency: z.string().optional(),
   storeName: z.string().optional(),
@@ -77,7 +163,7 @@ export const CreateProductRequestSchema = z.object({
 export type CreateProductRequest = z.infer<typeof CreateProductRequestSchema>;
 
 /**
- * Product Response: Canonical product DTO
+ * Product Response (Legacy fallback)
  */
 export const ProductResponseSchema = z.object({
   id: z.string(),
@@ -92,8 +178,8 @@ export const ProductResponseSchema = z.object({
   currency: z.string().optional(),
   storeName: z.string().optional(),
   description: z.string().optional(),
-  createdAt: z.string(), // ISO String
-  updatedAt: z.string(), // ISO String
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });
 
 export type ProductResponse = z.infer<typeof ProductResponseSchema>;
@@ -102,40 +188,30 @@ export type ProductResponse = z.infer<typeof ProductResponseSchema>;
  * Create Product Response
  */
 export const CreateProductResponseSchema = z.object({
-  product: ProductResponseSchema,
+  product: SavedProductSchema.or(ProductResponseSchema),
   duplicate: z.boolean().optional(),
 });
 
 export type CreateProductResponse = z.infer<typeof CreateProductResponseSchema>;
 
 /**
- * Pagination Schema
- */
-export const PaginationSchema = z.object({
-  limit: z.number().int().min(1).max(100).default(20),
-  cursor: z.string().optional(),
-});
-
-export type Pagination = z.infer<typeof PaginationSchema>;
-
-/**
- * Delete Product Response
- */
-export const DeleteProductResponseSchema = z.object({
-  success: z.boolean(),
-});
-
-export type DeleteProductResponse = z.infer<typeof DeleteProductResponseSchema>;
-
-/**
- * List Products Response (Paginated)
+ * List Products Response
  */
 export const ProductListResponseSchema = z.object({
-  products: z.array(ProductResponseSchema),
+  products: z.array(SavedProductSchema.or(ProductResponseSchema)),
   nextCursor: z.string().optional(),
 });
 
 export type ProductListResponse = z.infer<typeof ProductListResponseSchema>;
+
+/**
+ * Delete Response
+ */
+export const DeleteResponseSchema = z.object({
+  success: z.boolean(),
+});
+
+export type DeleteResponse = z.infer<typeof DeleteResponseSchema>;
 
 /**
  * Validation Error Response

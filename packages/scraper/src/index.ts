@@ -1,6 +1,5 @@
-import { scraperCore } from './core';
+import { scraperCore, type ExtractionDTO } from './core';
 import { type ExtractionResult } from './core/types';
-import { type ExtractionDTO } from '@wishhub/contracts';
 
 /**
  * Main Scraper Service
@@ -43,3 +42,4 @@ export const scraperService = new ScraperService();
 
 export * from './core';
 export * from './core/types';
+export * from './normalizers';

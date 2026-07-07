@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { WishHubSDK } from '@wishhub/sdk'
 import { type ExtractionResult } from '@wishhub/scraper'
+import { type WishlistSummary } from '@wishhub/contracts'
 import {
   Loader2,
   CheckCircle2,
@@ -8,8 +9,8 @@ import {
   AlertCircle,
   ShieldAlert,
   WifiOff,
-  Copy,
-  Plus
+  Plus,
+  ChevronDown
 } from 'lucide-react'
 
 const sdk = new WishHubSDK((import.meta as any).env.VITE_API_URL || 'http://localhost:3000')
@@ -27,6 +28,8 @@ type State =
 function App() {
   const [state, setState] = useState<State>('extracting')
   const [result, setResult] = useState<ExtractionResult | null>(null)
+  const [wishlists, setWishlists] = useState<WishlistSummary[]>([])
+  const [selectedWishlistId, setSelectedWishlistId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -34,12 +37,22 @@ function App() {
         setState('offline')
         return
     }
-    extract()
+    initialize()
   }, [])
 
-  const extract = async () => {
+  const initialize = async () => {
     setState('extracting')
     try {
+      // 1. Fetch Wishlists
+      const lists = await sdk.wishlists.list()
+      setWishlists(lists)
+
+      // 2. Determine initial wishlist (last used or default)
+      const storage = await chrome.storage.local.get('lastUsedWishlistId')
+      const initialId = (storage.lastUsedWishlistId as string) || lists.find(l => l.isDefault)?.id || lists[0]?.id
+      setSelectedWishlistId(initialId || null)
+
+      // 3. Extract Product
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
       if (!tab?.id) throw new Error('No active tab')
 
@@ -49,9 +62,12 @@ function App() {
       setResult(response)
       setState('preview')
     } catch (err: any) {
-      console.error(err)
-      setError(err.message)
-      setState('failed')
+      if (err.message?.includes('401') || err.status === 401) {
+        setState('unauthorized')
+      } else {
+        setError(err.message)
+        setState('failed')
+      }
     }
   }
 
@@ -59,6 +75,11 @@ function App() {
     if (!result) return
     setState('saving')
     try {
+      // Save last used wishlist
+      if (selectedWishlistId) {
+        await chrome.storage.local.set({ lastUsedWishlistId: selectedWishlistId })
+      }
+
       const response = await sdk.products.save({
         name: result.product.title,
         url: result.product.originalUrl,
@@ -68,8 +89,8 @@ function App() {
         storeName: result.product.store,
         description: result.product.description,
         rawMetadata: result.product.rawMetadata,
-        metadataVersion: 1,
-      })
+        wishlistId: selectedWishlistId,
+      } as any) // Type cast for custom fields
 
       if (response.duplicate) {
         setState('duplicate')
@@ -116,16 +137,16 @@ function App() {
   if (state === 'extracting') return (
     <div className="p-8 flex flex-col items-center justify-center w-80">
       <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-      <p className="font-medium animate-pulse">Extracting product details...</p>
+      <p className="font-medium animate-pulse">Initializing WishHub...</p>
     </div>
   )
 
   if (state === 'failed') return (
     <div className="p-6 flex flex-col items-center text-center w-80">
       <AlertCircle className="h-12 w-12 text-destructive mb-4" />
-      <h2 className="font-bold text-lg text-destructive">Extraction Failed</h2>
-      <p className="text-sm text-muted-foreground mt-2">{error || "We couldn't find any product details on this page."}</p>
-      <button onClick={extract} className="mt-4 w-full border border-input py-2 rounded-md font-medium hover:bg-accent">
+      <h2 className="font-bold text-lg text-destructive">Oops!</h2>
+      <p className="text-sm text-muted-foreground mt-2">{error || "Something went wrong."}</p>
+      <button onClick={initialize} className="mt-4 w-full border border-input py-2 rounded-md font-medium hover:bg-accent">
         Retry
       </button>
     </div>
@@ -137,8 +158,8 @@ function App() {
       <h2 className="font-bold text-lg">{state === 'duplicate' ? 'Already Saved!' : 'Product Saved!'}</h2>
       <p className="text-sm text-muted-foreground mt-2">
         {state === 'duplicate'
-            ? "This product is already in your WishHub."
-            : "The product has been successfully added to your list."}
+            ? "This product is already in your list."
+            : "Successfully added to your wishlist."}
       </p>
       <button onClick={openDashboard} className="mt-6 w-full bg-black text-white py-2 rounded-md font-medium flex items-center justify-center">
         <ExternalLink className="h-4 w-4 mr-2" />
@@ -175,6 +196,24 @@ function App() {
                         {product.currency} {product.price}
                     </div>
                 )}
+            </div>
+
+            <div className="mb-4">
+                <label className="text-[10px] font-bold uppercase text-muted-foreground mb-1.5 block">Save to wishlist</label>
+                <div className="relative">
+                    <select
+                        value={selectedWishlistId || ''}
+                        onChange={(e) => setSelectedWishlistId(e.target.value)}
+                        className="w-full bg-muted border-none rounded-md py-2 px-3 text-sm font-medium appearance-none focus:ring-1 focus:ring-primary outline-none cursor-pointer"
+                    >
+                        {wishlists.map(list => (
+                            <option key={list.id} value={list.id}>
+                                {list.name} {list.isDefault ? '(Default)' : ''}
+                            </option>
+                        ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                </div>
             </div>
 
             <button

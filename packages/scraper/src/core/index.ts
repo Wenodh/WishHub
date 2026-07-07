@@ -1,9 +1,28 @@
+import { type ExtractionProduct } from '@wishhub/contracts';
 import { AmazonAdapter } from '../adapters/amazon';
 import { GenericAdapter } from '../adapters/generic';
-import { type ExtractionProduct, type ExtractionDTO } from '@wishhub/contracts';
 import { type ScraperAdapter, type ExtractionResult } from './types';
 import { normalizeProduct } from '../normalizers';
 import { validateProduct } from '../validators';
+
+/**
+ * Compatibility DTO for Milestone 1A/B
+ * @deprecated Use ExtractionResult
+ */
+export interface ExtractionDTO {
+    name: string;
+    description?: string;
+    price?: number;
+    currency?: string;
+    url: string;
+    canonicalUrl?: string;
+    images: string[];
+    storeName?: string;
+    rawMetadata?: Record<string, any>;
+    confidence: number;
+    source: string;
+    missingFields: string[];
+}
 
 export abstract class BaseParser {
   abstract parse(doc: Document): Partial<ExtractionProduct> | null;
@@ -20,7 +39,7 @@ export class ScraperCore {
   }
 
   registerAdapter(adapter: ScraperAdapter) {
-    this.adapters.unshift(adapter); // Add to beginning so custom adapters take precedence
+    this.adapters.unshift(adapter);
   }
 
   async extract(doc: Document): Promise<ExtractionResult | null> {

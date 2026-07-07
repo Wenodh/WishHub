@@ -1,56 +1,67 @@
 import { type Result, ok, err } from '@wishhub/core';
 import { type CreateProductRequest } from '@wishhub/contracts';
 import { productRepository } from '../repository';
+import { catalogRepository } from '../repository/catalog.repository';
 import { urlNormalizerService } from './url-normalizer.service';
-import { type ProductEntity } from '../domain';
 import { telemetry } from '@wishhub/telemetry';
 
 export class SaveProductService {
   async execute(
     userId: string,
     data: CreateProductRequest
-  ): Promise<Result<ProductEntity, string>> {
+  ): Promise<Result<any, string>> {
     const start = performance.now();
     try {
       const canonicalUrl = urlNormalizerService.normalize(data.url);
 
-      // Idempotency: check if product already exists for this user
-      const existingProduct = await productRepository.findByCanonicalUrl(userId, canonicalUrl);
-      if (existingProduct) {
+      // 1. Get or Create Catalog Product
+      let catalogProduct = await catalogRepository.findByCanonicalUrl(canonicalUrl);
+      if (!catalogProduct) {
+        catalogProduct = await catalogRepository.create({
+          canonicalUrl,
+          name: data.name,
+          description: data.description,
+          storeName: data.storeName,
+          price: data.price,
+          currency: data.currency,
+          images: data.images || (data.imageUrl ? [data.imageUrl] : []),
+          rawMetadata: data.rawMetadata,
+        });
+      }
+
+      // 2. Link to User (SavedProduct)
+      const existingSaved = await productRepository.findByUserIdAndCatalogId(userId, catalogProduct.id);
+      if (existingSaved) {
         telemetry.logger.info('Product already saved, returning existing entity', {
           userId,
           operation: 'save-product',
           durationMs: performance.now() - start,
-          productId: existingProduct.id,
+          productId: existingSaved.id,
         });
         telemetry.track('product.duplicate', {
-            productId: existingProduct.id,
+            productId: existingSaved.id,
             userId,
             store: data.storeName || 'unknown'
         });
-        return ok(existingProduct);
+        return ok(existingSaved);
       }
 
-      const product = await productRepository.create({
-        ...data,
-        userId,
-        canonicalUrl,
-      });
+      const savedProduct = await productRepository.create(userId, catalogProduct.id);
 
       telemetry.logger.info('New product saved', {
         userId,
         operation: 'save-product',
         durationMs: performance.now() - start,
-        productId: product.id,
+        productId: savedProduct.id,
       });
 
       telemetry.track('product.saved', {
-        productId: product.id,
+        productId: savedProduct.id,
         userId,
         store: data.storeName || 'unknown'
       });
 
-      return ok(product);
+      return ok(savedProduct);
     } catch (error: any) {
       telemetry.logger.error('Failed to save product', {
         userId,

@@ -13,40 +13,82 @@ model User {
   email         String         @unique
   name          String?
   image         String?
-  products      SavedProduct[]
+  wishlists     Wishlist[]
+  savedProducts SavedProduct[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
 
-model SavedProduct {
+model CatalogProduct {
   id              String         @id @default(cuid())
-  userId          String
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  originalUrl     String
-  canonicalUrl    String
+  canonicalUrl    String         @unique
   name            String
   description     String?
+  brand           String?
+  storeName       String?
   price           Float?
   currency        String?
-  storeName       String?
-  images          ProductImage[]
+  images          CatalogProductImage[]
   rawMetadata     Json?
   metadataVersion Int            @default(1)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
+  savedBy         SavedProduct[]
 
-  @@unique([userId, canonicalUrl])
-  @@index([userId])
   @@index([canonicalUrl])
 }
 
-model ProductImage {
-  id             String       @id @default(cuid())
-  productId      String
-  product        SavedProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
-  url            String
-  type           String?      @default("original")
-  createdAt      DateTime     @default(now())
+model CatalogProductImage {
+  id               String         @id @default(cuid())
+  catalogProductId String
+  product          CatalogProduct @relation(fields: [catalogProductId], references: [id], onDelete: Cascade)
+  url              String
+  type             String?        @default("original")
+  createdAt        DateTime       @default(now())
 
-  @@index([productId])
+  @@index([catalogProductId])
+}
+
+model SavedProduct {
+  id               String         @id @default(cuid())
+  userId           String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  catalogProductId String
+  catalogProduct   CatalogProduct @relation(fields: [catalogProductId], references: [id], onDelete: Cascade)
+  notes            String?
+  archived         Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  wishlistItems    WishlistItem[]
+
+  @@unique([userId, catalogProductId])
+  @@index([userId])
+  @@index([catalogProductId])
+}
+
+model Wishlist {
+  id        String         @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  isDefault Boolean        @default(false)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  items     WishlistItem[]
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model WishlistItem {
+  id             String       @id @default(cuid())
+  wishlistId     String
+  wishlist       Wishlist     @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  savedProductId String
+  savedProduct   SavedProduct @relation(fields: [savedProductId], references: [id], onDelete: Cascade)
+  addedAt        DateTime     @default(now())
+
+  @@unique([wishlistId, savedProductId])
+  @@index([wishlistId])
+  @@index([savedProductId])
 }

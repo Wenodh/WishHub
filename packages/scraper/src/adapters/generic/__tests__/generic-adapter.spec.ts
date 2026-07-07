@@ -10,7 +10,7 @@ describe('GenericAdapter', () => {
   });
 
   it('should handle any URL', () => {
-    expect(adapter.canHandle('https://example.com')).toBe(true);
+    expect(adapter.canHandle()).toBe(true);
   });
 
   it('should extract product details using OpenGraph', async () => {
