@@ -1,11 +1,9 @@
 import { prisma } from '@wishhub/database';
-import { normalizeUrl } from '@wishhub/scraper';
 
 export class CatalogRepository {
   async findByCanonicalUrl(canonicalUrl: string) {
     return prisma.catalogProduct.findUnique({
       where: { canonicalUrl },
-      include: { images: true }
     });
   }
 
@@ -14,20 +12,16 @@ export class CatalogRepository {
     return prisma.catalogProduct.create({
       data: {
         ...rest,
-        images: {
-          create: images?.map((url: string) => ({ url })) || []
-        }
+        images: images || [],
+        store: data.store || data.storeName || 'unknown'
       },
-      include: { images: true }
     });
   }
 
   async update(id: string, data: any) {
-    // Basic update for now, image sync can be added later
     return prisma.catalogProduct.update({
       where: { id },
       data,
-      include: { images: true }
     });
   }
 }

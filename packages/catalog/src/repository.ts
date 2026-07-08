@@ -7,9 +7,7 @@ export class ProductRepository {
         userId_catalogProductId: { userId, catalogProductId }
       },
       include: {
-        catalogProduct: {
-          include: { images: true }
-        }
+        catalogProduct: true
       }
     });
   }
@@ -21,23 +19,20 @@ export class ProductRepository {
             catalogProduct: { canonicalUrl }
         },
         include: {
-            catalogProduct: {
-                include: { images: true }
-            }
+            catalogProduct: true
         }
     });
   }
 
-  async create(userId: string, catalogProductId: string) {
+  async create(userId: string, catalogProductId: string, originalUrl: string) {
     return prisma.savedProduct.create({
       data: {
         userId,
         catalogProductId,
+        originalUrl,
       },
       include: {
-        catalogProduct: {
-          include: { images: true }
-        }
+        catalogProduct: true
       }
     });
   }
@@ -46,11 +41,10 @@ export class ProductRepository {
     return prisma.savedProduct.findMany({
       where: { userId },
       include: {
-        catalogProduct: {
-          include: { images: true }
-        }
+        catalogProduct: true,
+        wishlistItems: true
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { addedAt: 'desc' }
     });
   }
 

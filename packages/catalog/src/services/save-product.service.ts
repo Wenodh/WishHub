@@ -20,6 +20,7 @@ export class SaveProductService {
         catalogProduct = await catalogRepository.create({
           canonicalUrl,
           name: data.name,
+          title: data.name, // Required by new schema
           description: data.description,
           storeName: data.storeName,
           price: data.price,
@@ -46,7 +47,7 @@ export class SaveProductService {
         return ok(existingSaved);
       }
 
-      const savedProduct = await productRepository.create(userId, catalogProduct.id);
+      const savedProduct = await productRepository.create(userId, catalogProduct.id, data.url);
 
       telemetry.logger.info('New product saved', {
         userId,

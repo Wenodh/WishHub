@@ -1,41 +1,39 @@
 import { prisma } from '@wishhub/database';
+import { WishlistItem } from '../domain/models';
 
 export class WishlistItemRepository {
-  async add(wishlistId: string, savedProductId: string) {
-    return prisma.wishlistItem.upsert({
+  async add(item: WishlistItem): Promise<void> {
+    await prisma.wishlistItem.upsert({
       where: {
-        wishlistId_savedProductId: { wishlistId, savedProductId },
+        wishlistId_savedProductId: {
+          wishlistId: item.wishlistId,
+          savedProductId: item.savedProductId,
+        },
       },
       create: {
-        wishlistId,
-        savedProductId,
+        wishlistId: item.wishlistId,
+        savedProductId: item.savedProductId,
+        createdAt: item.createdAt,
       },
       update: {},
     });
   }
 
-  async remove(wishlistId: string, savedProductId: string) {
-    return prisma.wishlistItem.delete({
+  async remove(wishlistId: string, savedProductId: string): Promise<void> {
+    await prisma.wishlistItem.delete({
       where: {
         wishlistId_savedProductId: { wishlistId, savedProductId },
       },
     });
   }
 
-  async move(savedProductId: string, fromWishlistId: string, toWishlistId: string) {
-    return prisma.$transaction([
-      prisma.wishlistItem.delete({
-        where: {
-          wishlistId_savedProductId: { wishlistId: fromWishlistId, savedProductId },
-        },
-      }),
-      prisma.wishlistItem.create({
-        data: {
-          wishlistId: toWishlistId,
-          savedProductId,
-        },
-      }),
-    ]);
+  async findByWishlistId(wishlistId: string): Promise<WishlistItem[]> {
+    const data = await prisma.wishlistItem.findMany({
+      where: { wishlistId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return data.map(item => new WishlistItem(item));
   }
 }
 

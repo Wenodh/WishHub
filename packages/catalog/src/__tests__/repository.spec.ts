@@ -35,9 +35,7 @@ describe('ProductRepository', () => {
         catalogProduct: { canonicalUrl },
       },
       include: {
-        catalogProduct: {
-          include: { images: true },
-        },
+        catalogProduct: true,
       },
     });
   });

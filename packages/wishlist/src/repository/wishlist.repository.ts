@@ -1,80 +1,68 @@
 import { prisma } from '@wishhub/database';
+import { Wishlist } from '../domain/models';
 
 export class WishlistRepository {
-  async create(userId: string, name: string, isDefault: boolean = false) {
-    return prisma.wishlist.create({
-      data: {
-        userId,
-        name,
-        isDefault,
-      },
+  async findById(id: string): Promise<Wishlist | null> {
+    const data = await prisma.wishlist.findUnique({
+      where: { id },
     });
+
+    if (!data) return null;
+
+    return new Wishlist(data, data.id);
   }
 
-  async findByUserId(userId: string) {
-    return prisma.wishlist.findMany({
-      where: { userId },
-      include: {
-        _count: {
-          select: { items: true },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-  }
-
-  async findDefault(userId: string) {
-    return prisma.wishlist.findFirst({
+  async findDefault(userId: string): Promise<Wishlist | null> {
+    const data = await prisma.wishlist.findFirst({
       where: { userId, isDefault: true },
     });
+
+    if (!data) return null;
+
+    return new Wishlist(data, data.id);
   }
 
-  async findById(id: string) {
-    return prisma.wishlist.findUnique({
+  async findByUserId(userId: string): Promise<Wishlist[]> {
+    const data = await prisma.wishlist.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return data.map(w => new Wishlist(w, w.id));
+  }
+
+  async save(wishlist: Wishlist): Promise<Wishlist> {
+    const data = await prisma.wishlist.upsert({
+      where: { id: wishlist.id },
+      create: {
+        id: wishlist.id,
+        userId: wishlist.userId,
+        name: wishlist.name,
+        isDefault: wishlist.isDefault,
+      },
+      update: {
+        name: wishlist.name,
+        isDefault: wishlist.isDefault,
+      },
+    });
+
+    return new Wishlist(data, data.id);
+  }
+
+  async delete(id: string): Promise<void> {
+    await prisma.wishlist.delete({
       where: { id },
-      include: {
-        items: {
-          include: {
-            savedProduct: {
-              include: {
-                catalogProduct: {
-                  include: { images: true }
-                }
-              }
-            }
-          }
-        }
-      }
     });
   }
 
-  async update(id: string, data: { name?: string; isDefault?: boolean }) {
-    return prisma.wishlist.update({
-      where: { id },
-      data,
-    });
-  }
-
-  async delete(id: string) {
-    return prisma.wishlist.delete({
-      where: { id },
-    });
-  }
-
-  async unsetOtherDefaults(userId: string, currentDefaultId: string) {
-    return prisma.wishlist.updateMany({
+  async unsetOtherDefaults(userId: string, currentDefaultId: string): Promise<void> {
+    await prisma.wishlist.updateMany({
       where: {
         userId,
         id: { not: currentDefaultId },
         isDefault: true,
       },
       data: { isDefault: false },
-    });
-  }
-
-  async count(userId: string) {
-    return prisma.wishlist.count({
-      where: { userId }
     });
   }
 }

@@ -5,12 +5,14 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
+    "@wishhub/catalog": "workspace:^",
     "@wishhub/contracts": "workspace:*",
     "@wishhub/core": "workspace:^",
     "@wishhub/database": "workspace:*",
-    "@wishhub/catalog": "workspace:^",
+    "@wishhub/scraper": "workspace:^",
     "@wishhub/telemetry": "workspace:^",
-    "@wishhub/types": "workspace:*"
+    "@wishhub/types": "workspace:*",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@wishhub/config": "workspace:*",

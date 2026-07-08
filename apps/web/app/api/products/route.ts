@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { auth } from '@wishhub/auth';
 import {
   listProductsService,
+  saveProductService
 } from '@wishhub/catalog';
-import { addProductToWishlistService } from '@wishhub/wishlist';
 import { CreateProductRequestSchema, PaginationSchema } from '@wishhub/contracts';
 
 export async function GET(req: Request): Promise<NextResponse> {
@@ -44,20 +44,14 @@ export async function POST(req: Request): Promise<NextResponse> {
       }, { status: 400 });
     }
 
-    // Default to Milestone 2 flow: Add to Wishlist
-    const result = await addProductToWishlistService.execute(
-        session.user.id,
-        validationResult.data,
-        (body as any).wishlistId
-    );
+    const result = await saveProductService.execute(session.user.id, validationResult.data);
 
     if (!result.ok) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
     return NextResponse.json({
-        product: result.value.savedProduct,
-        wishlistId: result.value.wishlistId
+        product: result.value,
     }, { status: 201 });
   } catch (error: any) {
     console.error('API Error:', error);
