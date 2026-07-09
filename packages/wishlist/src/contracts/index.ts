@@ -63,9 +63,52 @@ export const WishlistSummarySchema = z.object({
   itemCount: z.number().int().min(0),
 });
 
+export type WishlistSummaryDto = z.infer<typeof WishlistSummarySchema>;
+
 export const WishlistDetailSchema = WishlistDtoSchema.extend({
     // We'll add more detail here in Phase 3
 });
+
+export type WishlistDetailDto = z.infer<typeof WishlistDetailSchema>;
+
+export const WishlistProductDtoSchema = z.object({
+  savedProductId: z.string(),
+  catalogProductId: z.string(),
+  title: z.string(),
+  brand: z.string().optional().nullable(),
+  store: z.string(),
+  price: z.number().optional().nullable(),
+  currency: z.string().optional().nullable(),
+  imageUrl: z.string().optional().nullable(),
+  addedAt: z.string(),
+});
+
+export type WishlistProductDto = z.infer<typeof WishlistProductDtoSchema>;
+
+export const PaginationDtoSchema = z.object({
+  page: z.number().int().min(1),
+  pageSize: z.number().int().min(1),
+  total: z.number().int().min(0),
+  totalPages: z.number().int().min(0),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean(),
+});
+
+export type PaginationDto = z.infer<typeof PaginationDtoSchema>;
+
+export const WishlistProductsResponseSchema = z.object({
+  wishlist: WishlistDtoSchema,
+  products: z.array(WishlistProductDtoSchema),
+  pagination: PaginationDtoSchema,
+});
+
+export type WishlistProductsResponse = z.infer<typeof WishlistProductsResponseSchema>;
+
+export const WishlistListResponseSchema = z.object({
+  wishlists: z.array(WishlistSummarySchema),
+});
+
+export type WishlistListResponse = z.infer<typeof WishlistListResponseSchema>;
 
 export const WishlistWithProductsSchema = WishlistDtoSchema.extend({
   products: z.array(z.any()), // Placeholder until product DTO is fully settled

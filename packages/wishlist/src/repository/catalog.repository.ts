@@ -1,9 +1,25 @@
-import { prisma } from '@wishhub/database';
+import { prisma, Prisma } from '@wishhub/database';
 import { CatalogProduct } from '../domain/models';
 
 export class CatalogRepository {
-  async findByCanonicalUrl(canonicalUrl: string): Promise<CatalogProduct | null> {
-    const data = await prisma.catalogProduct.findUnique({
+  async findById(id: string, tx?: Prisma.TransactionClient): Promise<CatalogProduct | null> {
+    const client = tx || prisma;
+    const data = await client.catalogProduct.findUnique({
+      where: { id },
+    });
+
+    if (!data) return null;
+
+    return new CatalogProduct({
+      ...data,
+      images: data.images as string[],
+      metadata: data.metadata as Record<string, any>,
+    }, data.id);
+  }
+
+  async findByCanonicalUrl(canonicalUrl: string, tx?: Prisma.TransactionClient): Promise<CatalogProduct | null> {
+    const client = tx || prisma;
+    const data = await client.catalogProduct.findUnique({
       where: { canonicalUrl },
     });
 
@@ -16,8 +32,24 @@ export class CatalogRepository {
     }, data.id);
   }
 
-  async save(product: CatalogProduct): Promise<CatalogProduct> {
-    const data = await prisma.catalogProduct.upsert({
+  async findByIds(ids: string[], tx?: Prisma.TransactionClient): Promise<CatalogProduct[]> {
+    const client = tx || prisma;
+    const data = await client.catalogProduct.findMany({
+      where: {
+        id: { in: ids },
+      },
+    });
+
+    return data.map((d: any) => new CatalogProduct({
+      ...d,
+      images: d.images as string[],
+      metadata: d.metadata as Record<string, any>,
+    }, d.id));
+  }
+
+  async save(product: CatalogProduct, tx?: Prisma.TransactionClient): Promise<CatalogProduct> {
+    const client = tx || prisma;
+    const data = await client.catalogProduct.upsert({
       where: { canonicalUrl: product.canonicalUrl },
       create: {
         id: product.id,

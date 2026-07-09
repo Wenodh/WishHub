@@ -1,4 +1,11 @@
 import { BaseEntity } from '@wishhub/core';
+import {
+  WishlistCreated,
+  WishlistRenamed,
+  WishlistSetAsDefault,
+  ProductAddedToWishlist,
+  ProductRemovedFromWishlist
+} from './events';
 
 export interface CatalogProductProps {
   store: string;
@@ -65,20 +72,30 @@ export interface WishlistProps {
 export class Wishlist extends BaseEntity<WishlistProps> {
   constructor(props: WishlistProps, id?: string) {
     super(props, id);
+    if (!id) {
+        this.addDomainEvent(new WishlistCreated(this.id, props.userId));
+    }
   }
 
   get userId() { return this.props.userId; }
   get name() { return this.props.name; }
   get isDefault() { return this.props.isDefault; }
+  get createdAt() { return this.props.createdAt; }
+  get updatedAt() { return this.props.updatedAt; }
 
   rename(newName: string) {
+    const oldName = this.props.name;
     this.props.name = newName.trim();
     this.props.updatedAt = new Date();
+    this.addDomainEvent(new WishlistRenamed(this.id, oldName, this.props.name));
   }
 
   makeDefault() {
-    this.props.isDefault = true;
-    this.props.updatedAt = new Date();
+    if (!this.props.isDefault) {
+        this.props.isDefault = true;
+        this.props.updatedAt = new Date();
+        this.addDomainEvent(new WishlistSetAsDefault(this.id, this.props.userId));
+    }
   }
 }
 
@@ -88,14 +105,19 @@ export interface WishlistItemProps {
   createdAt: Date;
 }
 
-export class WishlistItem {
-  private props: WishlistItemProps;
-
-  constructor(props: WishlistItemProps) {
-    this.props = props;
+export class WishlistItem extends BaseEntity<WishlistItemProps> {
+  constructor(props: WishlistItemProps, id?: string) {
+    super(props, id);
+    if (!id) {
+        this.addDomainEvent(new ProductAddedToWishlist(props.wishlistId, props.savedProductId));
+    }
   }
 
   get wishlistId() { return this.props.wishlistId; }
   get savedProductId() { return this.props.savedProductId; }
   get createdAt() { return this.props.createdAt; }
+
+  remove() {
+    this.addDomainEvent(new ProductRemovedFromWishlist(this.wishlistId, this.savedProductId));
+  }
 }
