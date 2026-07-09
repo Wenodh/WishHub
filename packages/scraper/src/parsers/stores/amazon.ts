@@ -1,8 +1,11 @@
-import { type ExtractionDTO } from '@wishhub/contracts';
+import { type ExtractionProduct } from '@wishhub/contracts';
 import { BaseParser } from '../../core';
 
+/**
+ * @deprecated Use AmazonAdapter
+ */
 export class AmazonParser extends BaseParser {
-  parse(doc: Document): Partial<ExtractionDTO> | null {
+  parse(doc: Document): Partial<ExtractionProduct> | null {
     if (!doc.location.hostname.includes('amazon.')) return null;
 
     const title = doc.querySelector('#productTitle')?.textContent?.trim();
@@ -18,12 +21,12 @@ export class AmazonParser extends BaseParser {
                   doc.querySelector('#imgBlkFront')?.getAttribute('src');
 
     return {
-      name: title,
+      title,
       price,
       currency,
       images: image ? [image] : [],
-      storeName: 'Amazon',
-      url: doc.location.href,
+      store: 'Amazon',
+      originalUrl: doc.location.href,
     };
   }
 }

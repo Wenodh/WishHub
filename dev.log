@@ -1,0 +1,17 @@
+
+> web@0.1.0 dev /app/apps/web
+> next dev --port 3000 "--port" "3001"
+
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://192.168.0.2:3001
+✓ Ready in 745ms
+(node:1721674) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///app/apps/web/next.config.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /app/apps/web/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ GET /dashboard 200 in 792ms (next.js: 367ms, application-code: 425ms)
+[2m2026-07-07T12:39:39.267Z[0m [33mWARN[0m [1m[Better Auth]:[0m [better-auth] Base URL is not set. Set the baseURL option or BETTER_AUTH_URL env, or use a dynamic baseURL with allowedHosts for multi-host setups. Without it the origin is derived from the incoming request, and callbacks and redirects may not work correctly.
+ GET /api/products? 401 in 511ms (next.js: 484ms, application-code: 27ms)
+ GET /api/wishlists 401 in 785ms (next.js: 777ms, application-code: 8ms)

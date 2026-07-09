@@ -10,8 +10,15 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/jsdom": "^28.0.3",
     "@wishhub/config": "workspace:*",
+    "jsdom": "^29.1.1",
     "typescript": "^5.6.3",
     "vitest": "^4.1.9"
+  },
+  "scripts": {
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   }
 }

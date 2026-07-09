@@ -1,21 +1,25 @@
-import { type ExtractionDTO } from '@wishhub/contracts';
-import { BaseParser } from '../core';
+import { type ExtractionProduct } from '@wishhub/contracts';
+import { type ScraperParser } from '../core/types';
 
-export class JsonLdParser extends BaseParser {
-  parse(doc: Document): Partial<ExtractionDTO> | null {
+export class JsonLdParser implements ScraperParser {
+  name = 'json-ld';
+  parse(doc: Document): Partial<ExtractionProduct> | null {
     const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
     for (const script of Array.from(scripts)) {
       try {
         const data = JSON.parse(script.textContent || '{}');
         const product = this.findProduct(data);
         if (product) {
+          const offers = Array.isArray(product.offers) ? product.offers[0] : product.offers;
+
           return {
-            name: product.name,
+            title: product.name,
             description: product.description,
             images: Array.isArray(product.image) ? product.image : (product.image ? [product.image] : []),
-            price: product.offers?.price ? parseFloat(product.offers.price) : undefined,
-            currency: product.offers?.priceCurrency,
-            storeName: product.brand?.name || product.publisher?.name,
+            price: offers?.price ? parseFloat(offers.price) : undefined,
+            currency: offers?.priceCurrency,
+            brand: product.brand?.name || product.brand,
+            category: product.category,
             rawMetadata: data,
           };
         }

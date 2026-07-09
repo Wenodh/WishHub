@@ -1,42 +1,45 @@
-import { type ExtractionDTO } from '@wishhub/contracts';
-import { JsonLdParser } from './parsers/json-ld';
-import { OpenGraphParser } from './parsers/opengraph';
-import { AmazonParser } from './parsers/stores/amazon';
-import { type ExtractionResult } from './core';
+import { scraperCore, type ExtractionDTO } from './core';
+import { type ExtractionResult } from './core/types';
 
+/**
+ * Main Scraper Service
+ * Orchestrates adapters and provides a unified API
+ */
 export class ScraperService {
-  private parsers = [
-    { parser: new AmazonParser(), source: 'amazon' as const, weight: 1.0 },
-    { parser: new JsonLdParser(), source: 'json-ld' as const, weight: 0.9 },
-    { parser: new OpenGraphParser(), source: 'opengraph' as const, weight: 0.7 },
-  ];
-
+  /**
+   * Extract product information from a Document
+   */
   async extract(doc: Document): Promise<ExtractionResult | null> {
-    for (const { parser, source, weight } of this.parsers) {
-      const data = parser.parse(doc);
-      if (data && data.name) {
-        return {
-          product: {
-            ...data,
-            url: data.url || doc.location.href,
-            name: data.name,
-            confidence: weight,
-            source,
-          } as ExtractionDTO,
-          confidence: weight,
-          source,
-          missingFields: this.getMissingFields(data),
-        };
-      }
-    }
-    return null;
+    return scraperCore.extract(doc);
   }
 
-  private getMissingFields(data: Partial<ExtractionDTO>): string[] {
-    const required: (keyof ExtractionDTO)[] = ['name', 'url'];
-    return required.filter(field => !data[field as keyof ExtractionDTO]);
+  /**
+   * Compatibility layer for Milestone 1A
+   * @deprecated Use extract()
+   */
+  async extractOld(doc: Document): Promise<ExtractionDTO | null> {
+    const result = await this.extract(doc);
+    if (!result) return null;
+
+    return {
+      name: result.product.title,
+      description: result.product.description,
+      price: result.product.price,
+      currency: result.product.currency,
+      url: result.product.originalUrl,
+      canonicalUrl: result.product.canonicalUrl,
+      images: result.product.images,
+      storeName: result.product.store || result.extractionSource[0],
+      rawMetadata: result.product.rawMetadata,
+      confidence: result.confidence,
+      source: result.extractionSource[0] as any,
+      missingFields: result.missingFields,
+    };
   }
 }
 
 export const scraperService = new ScraperService();
+
 export * from './core';
+export * from './core/types';
+export * from './normalizers';

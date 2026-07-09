@@ -1,20 +1,21 @@
-import { type ExtractionDTO } from '@wishhub/contracts';
-import { BaseParser } from '../core';
+import { type ExtractionProduct } from '@wishhub/contracts';
+import { type ScraperParser } from '../core/types';
 
-export class OpenGraphParser extends BaseParser {
-  parse(doc: Document): Partial<ExtractionDTO> | null {
+export class OpenGraphParser implements ScraperParser {
+  name = 'opengraph';
+  parse(doc: Document): Partial<ExtractionProduct> | null {
     const getMeta = (property: string) =>
       doc.querySelector(`meta[property="${property}"], meta[name="${property}"]`)?.getAttribute('content');
 
-    const name = getMeta('og:title');
-    if (!name) return null;
+    const title = getMeta('og:title');
+    if (!title) return null;
 
     return {
-      name,
+      title,
       description: getMeta('og:description') || undefined,
       images: getMeta('og:image') ? [getMeta('og:image')!] : [],
-      storeName: getMeta('og:site_name') || undefined,
-      url: getMeta('og:url') || window.location.href,
+      store: getMeta('og:site_name') || undefined,
+      originalUrl: getMeta('og:url') || doc.location.href,
     };
   }
 }

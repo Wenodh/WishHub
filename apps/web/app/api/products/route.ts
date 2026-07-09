@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@wishhub/auth';
-import { saveProductService, listProductsService } from '@wishhub/catalog';
+import {
+  listProductsService,
+  saveProductService
+} from '@wishhub/catalog';
 import { CreateProductRequestSchema, PaginationSchema } from '@wishhub/contracts';
 
 export async function GET(req: Request): Promise<NextResponse> {
@@ -47,8 +50,11 @@ export async function POST(req: Request): Promise<NextResponse> {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    return NextResponse.json({ product: result.value }, { status: 201 });
+    return NextResponse.json({
+        product: result.value,
+    }, { status: 201 });
   } catch (error: any) {
+    console.error('API Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
