@@ -8,12 +8,14 @@
     "build": "tsc && vite build",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@wishhub/api-client": "workspace:*",
     "@wishhub/contracts": "workspace:*",
     "@wishhub/env": "workspace:*",
+    "@wishhub/telemetry": "workspace:*",
     "@wishhub/scraper": "workspace:*",
     "@wishhub/sdk": "workspace:*",
     "@wishhub/types": "workspace:*",
@@ -23,6 +25,8 @@
     "react-dom": "19.0.0"
   },
   "devDependencies": {
+    "vitest": "^2.1.3",
+    "happy-dom": "^15.7.4",
     "@types/chrome": "^0.2.2",
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",
