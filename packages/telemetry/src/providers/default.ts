@@ -11,6 +11,8 @@ export class ConsoleLogger implements ILogger {
       message,
       ...context,
     };
+    // In production, we might want to avoid console.log if a real logging service is attached,
+    // but for now, we keep it as the default provider.
     console.log(JSON.stringify(entry));
   }
 
@@ -41,6 +43,37 @@ export class ConsoleErrorReporting implements IErrorReporting {
   }
 }
 
+/**
+ * Composite Telemetry allows multiple providers to be notified of events.
+ * This is useful for migrating to Sentry/PostHog/Datadog without breaking local logs.
+ */
+export class CompositeTelemetry implements ITelemetry {
+    constructor(
+        private providers: ITelemetry[]
+    ) {}
+
+    get logger(): ILogger {
+        // Returns the first provider's logger for simplicity, or a combined logger if needed.
+        return this.providers[0]?.logger || new ConsoleLogger('noop');
+    }
+
+    get metrics(): IMetrics {
+        return this.providers[0]?.metrics || new NoopMetrics();
+    }
+
+    get tracing(): ITracing {
+        return this.providers[0]?.tracing || new NoopTracing();
+    }
+
+    get errorReporting(): IErrorReporting {
+        return this.providers[0]?.errorReporting || new ConsoleErrorReporting();
+    }
+
+    track<K extends keyof TelemetryEvents>(event: K, properties: TelemetryEvents[K]) {
+        this.providers.forEach(p => p.track(event, properties));
+    }
+}
+
 export class DefaultTelemetry implements ITelemetry {
   constructor(
     public logger: ILogger,
@@ -50,6 +83,6 @@ export class DefaultTelemetry implements ITelemetry {
   ) {}
 
   track<K extends keyof TelemetryEvents>(event: K, properties: TelemetryEvents[K]) {
-    this.logger.info(`Event: ${event}`, properties as any);
+    this.logger.info(`Telemetry: ${event}`, properties as any);
   }
 }

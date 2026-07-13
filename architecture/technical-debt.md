@@ -1,75 +1,34 @@
 # Technical Debt Register
 
-This document tracks intentional architectural shortcuts, deferred features, and areas for future improvement.
+This document tracks known technical limitations and architectural improvements identified during development.
 
-## AI
-- **Reason:** Focus on core wishlist functionality first.
-- **Priority:** Low
-- **Estimated Milestone:** Phase 7
-- **Dependencies:** Catalog, Wishlist, Scraper
-- **Risks:** High complexity, requires significant training data or expensive LLM calls.
-- **Approximate Complexity:** L
+## High Priority
 
-## Notifications
-- **Reason:** Not required for MVP saving/viewing.
-- **Priority:** Medium
-- **Estimated Milestone:** Phase 6
-- **Dependencies:** Database, Auth, Realtime
-- **Risks:** Device-specific implementation complexity (FCM/APNS).
-- **Approximate Complexity:** M
+### 1. Advanced Search Optimization
+- **Category**: Performance
+- **Current State**: Search is performed using basic Prisma `contains` queries.
+- **Goal**: Implement full-text search using Postgres indexes or Algolia.
 
-## Price Tracking
-- **Reason:** Requires background workers and robust cron infrastructure.
-- **Priority:** High
-- **Estimated Milestone:** Phase 5
-- **Dependencies:** Scraper, Jobs, Database
-- **Risks:** Anti-scraping measures, high resource consumption for frequent checks.
-- **Approximate Complexity:** L
+### 2. Image Optimization and Resizing
+- **Category**: Performance
+- **Current State**: We serve raw product images directly from stores.
+- **Goal**: Implement a proxy/CDN that resizes and caches images for the dashboard grid.
 
-## Search
-- **Reason:** Database-level indexing is sufficient for initial user collections.
-- **Priority:** Low
-- **Estimated Milestone:** Phase 8 (Scaling)
-- **Dependencies:** Database, Catalog
-- **Risks:** Advanced search (Elasticsearch/Algolia) introduces infrastructure overhead.
-- **Approximate Complexity:** M
+## Medium Priority
 
-## Analytics
-- **Reason:** Focus on user value before usage tracking.
-- **Priority:** Medium
-- **Estimated Milestone:** Phase 1 (Post-MVP)
-- **Dependencies:** Telemetry
-- **Risks:** Privacy compliance (GDPR/CCPA).
-- **Approximate Complexity:** S
+### 3. Background Scraper Resiliency
+- **Category**: Reliability
+- **Current State**: Scraping happens synchronously during the API request.
+- **Goal**: Move scraping to a background job (e.g., Upstash Workflow) to reduce latency and allow for retries.
 
-## Feature Flags
-- **Reason:** Minimal flags needed during initial development.
-- **Priority:** Medium
-- **Estimated Milestone:** Phase 1
-- **Dependencies:** Config, Env
-- **Risks:** Conditional logic sprawl.
-- **Approximate Complexity:** S
+### 4. Shared SDK for Mobile
+- **Category**: Architecture
+- **Current State**: `@wishhub/sdk` is optimized for web fetch.
+- **Goal**: Ensure the SDK works seamlessly in React Native environment without Node.js dependencies.
 
-## Mobile
-- **Reason:** Web and Extension are primary capture/view platforms.
-- **Priority:** High
-- **Estimated Milestone:** Phase 4
-- **Dependencies:** API Client, SDK, Core
-- **Risks:** React Native environment maintenance.
-- **Approximate Complexity:** L
+## Low Priority
 
-## Extension
-- **Reason:** Core scraper, but focus is on the vertical slice first.
-- **Priority:** High
-- **Estimated Milestone:** Phase 1
-- **Dependencies:** Scraper, SDK, Contracts
-- **Risks:** Browser review process.
-- **Approximate Complexity:** M
-
-## Documentation
-- **Reason:** Fumadocs is initialized but content is deferred.
-- **Priority:** High
-- **Estimated Milestone:** Phase 0 (Continuous)
-- **Dependencies:** All packages
-- **Risks:** Stale documentation.
-- **Approximate Complexity:** M
+### 5. Automated E2E Flow Tests
+- **Category**: Testing
+- **Current State**: We have high unit and integration coverage, but few end-to-end flows.
+- **Goal**: Implement Playwright tests covering the path from Extension save to Dashboard view.

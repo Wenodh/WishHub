@@ -1,18 +1,28 @@
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 export interface LogContext {
+  // Identification
   requestId?: string;
   userId?: string;
+
+  // Request/Response
   route?: string;
+  method?: string;
+  statusCode?: number;
+  errorCode?: string;
+  durationMs?: number;
+
+  // Execution Context
   service?: string;
   operation?: string;
-  durationMs?: number;
+
+  // Domain Specific
   store?: string;
   adapter?: string;
   confidence?: number;
   extractionSource?: string[];
-  statusCode?: number;
-  errorCode?: string;
+
+  // Arbitrary context
   [key: string]: any;
 }
 
@@ -47,8 +57,16 @@ export interface TelemetryEvents {
   'scraper.started': { url: string; adapter: string };
   'scraper.completed': { url: string; adapter: string; confidence: number };
   'scraper.failed': { url: string; adapter: string; error: string };
-  'api.request': { route: string; method: string };
-  'api.response': { route: string; method: string; statusCode: number; durationMs: number };
+  'api.request': { route: string; method: string; requestId: string; userId?: string };
+  'api.response': {
+    route: string;
+    method: string;
+    statusCode: number;
+    durationMs: number;
+    requestId: string;
+    userId?: string;
+    errorCode?: string;
+  };
 }
 
 export interface ITelemetry {

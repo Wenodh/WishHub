@@ -1,33 +1,35 @@
-# Changelog
+# WishHub v1.0.0-beta Release Notes
 
-All notable changes to this project will be documented in this file.
+Welcome to the first public beta of WishHub! This release marks the completion of the core vertical slice and the multi-wishlist organization system.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## New Features
 
-## [0.1.0] - 2025-06-29
+### 📦 Unified Catalog
+Products are now saved into a central catalog. This means if multiple users save the same item, we keep the data normalized and high-quality.
 
-### Added
+### 📁 Multi-Wishlist Support
+You are no longer limited to one long list. Create custom wishlists for "Home Office", "Birthday Ideas", or "Dream Vacation".
 
-- **Infrastructure**: Initialized Turborepo monorepo with pnpm workspaces.
-- **Shared Config**: Centralized ESLint, Prettier, TypeScript, and Tailwind configurations in `@wishhub/config`.
-- **Core Package**: Created `@wishhub/core` for DDD primitives.
-- **Environment**: Implemented type-safe environment variable management in `@wishhub/env`.
-- **Database**: Set up `@wishhub/database` with Prisma and initial PostgreSQL schema.
-- **Auth**: Configured `@wishhub/auth` with Better Auth and Prisma adapter.
-- **UI**: Established `@wishhub/ui` design system with core components.
-- **Applications**: Initialized apps for Web (Next.js), Docs (Fumadocs), Extension (Vite), and Mobile (Expo).
-- **Architecture**: Comprehensive documentation including ADRs, roadmap, and technical debt register.
+### ⚡ Refreshed Dashboard
+A modern, responsive dashboard with:
+- **Grid & List views**
+- **Optimistic updates** (no waiting for loaders)
+- **Advanced Search & Sort**
 
-## [0.2.0] - 2025-07-02
+### 🧩 Smarter Browser Extension
+The browser extension now supports:
+- **Direct wishlist selection**
+- **Enhanced extraction** for major retailers like Amazon.
 
-### Added
-- **Milestone 1A**: First end-to-end vertical slice completed.
-- **Extension**: Full Amazon product extraction and saving flow.
-- **Dashboard**: Web dashboard for viewing and deleting saved products.
-- **API**: Standardized product endpoints with session and Zod validation.
-- **Persistence**: Implemented `SavedProduct` repository and services.
+## Improvements
+- **Performance**: Optimized database queries with single-pass count aggregation.
+- **Security**: Hardened authentication enforcement across all API routes.
+- **Observability**: Standardized telemetry logging for better debugging.
 
-### Changed
-- **Framework**: Upgraded Next.js to **v16.2.10** to resolve security vulnerabilities (CVE-2025-29927).
-- **Tooling**: Standardized React versions and ESLint configurations across the monorepo.
+## Known Issues
+- Mobile app is currently in "Foundation" mode and not fully functional.
+- Amazon extraction might occasionally fail if they change their DOM structure.
+- Large wishlists (>500 items) may experience slight rendering lag in grid view.
+
+---
+Thank you for trying WishHub! Please report any bugs via GitHub Issues.

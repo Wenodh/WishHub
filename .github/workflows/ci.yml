@@ -24,7 +24,10 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
+
+      - name: Prisma Validate
+        run: pnpm -F @wishhub/database exec prisma validate
 
       - name: Prisma Generate
         run: pnpm db:generate
