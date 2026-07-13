@@ -31,7 +31,22 @@ export const useDeleteProduct = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => sdk.products.delete(id),
-    onSuccess: () => {
+    onMutate: async (id) => {
+        await queryClient.cancelQueries({ queryKey: ['products'] });
+        const previousProducts = queryClient.getQueryData(['products']);
+        queryClient.setQueryData(['products'], (old: any) => {
+            if (!old || !old.products) return old;
+            return {
+                ...old,
+                products: old.products.filter((p: any) => p.id !== id)
+            };
+        });
+        return { previousProducts };
+    },
+    onError: (err, id, context: any) => {
+        queryClient.setQueryData(['products'], context?.previousProducts);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['wishlists'] });
     },
@@ -42,25 +57,31 @@ export const useDeleteProduct = () => {
 export const useWishlists = () => {
     return useQuery({
         queryKey: ['wishlists'],
-        queryFn: async () => {
-            const res = await fetch('/api/wishlists');
-            if (!res.ok) throw new Error('Failed to fetch wishlists');
-            const data = await res.json();
-            return data.wishlists;
+        queryFn: () => sdk.wishlists.list(),
+    });
+};
+
+export const useDefaultWishlist = () => {
+    return useQuery({
+        queryKey: ['wishlists', 'default'],
+        queryFn: () => sdk.wishlists.getDefault(),
+    });
+};
+
+export const useSetDefaultWishlist = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (wishlistId: string) => sdk.wishlists.setDefault(wishlistId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['wishlists'] });
         }
     });
 };
 
-export const useWishlist = (id: string | null) => {
+export const useWishlistProducts = (id: string | null, params?: { page?: number; pageSize?: number }) => {
     return useQuery({
-        queryKey: ['wishlists', id],
-        queryFn: async () => {
-            if (!id) return null;
-            const res = await fetch(`/api/wishlists/${id}`);
-            if (!res.ok) throw new Error('Failed to fetch wishlist');
-            const data = await res.json();
-            return data.wishlist;
-        },
+        queryKey: ['wishlists', id, 'products', params],
+        queryFn: () => id ? sdk.wishlists.getProducts(id, params) : null,
         enabled: !!id
     });
 };
@@ -68,18 +89,7 @@ export const useWishlist = (id: string | null) => {
 export const useCreateWishlist = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (data: CreateWishlistRequest) => {
-            const res = await fetch('/api/wishlists', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error || 'Failed to create wishlist');
-            }
-            return res.json();
-        },
+        mutationFn: (data: CreateWishlistRequest) => sdk.wishlists.create(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['wishlists'] });
         }
@@ -89,18 +99,23 @@ export const useCreateWishlist = () => {
 export const useUpdateWishlist = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async ({ id, ...data }: UpdateWishlistRequest & { id: string }) => {
-            const res = await fetch(`/api/wishlists/${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+        mutationFn: ({ id, ...data }: UpdateWishlistRequest & { id: string }) =>
+            sdk.wishlists.update(id, data),
+        onMutate: async ({ id, name }) => {
+            await queryClient.cancelQueries({ queryKey: ['wishlists'] });
+            const previousWishlists = queryClient.getQueryData(['wishlists']);
+            queryClient.setQueryData(['wishlists'], (old: any) => {
+                if (!old) return old;
+                return old.map((w: any) => w.id === id ? { ...w, name } : w);
             });
-            if (!res.ok) throw new Error('Failed to update wishlist');
-            return res.json();
+            return { previousWishlists };
         },
-        onSuccess: (_, variables) => {
+        onError: (err, variables, context: any) => {
+            queryClient.setQueryData(['wishlists'], context?.previousWishlists);
+        },
+        onSettled: (_, __, variables) => {
             queryClient.invalidateQueries({ queryKey: ['wishlists'] });
-            queryClient.invalidateQueries({ queryKey: ['wishlists', variables.id] });
+            queryClient.invalidateQueries({ queryKey: ['wishlists', variables.id, 'products'] });
         }
     });
 };
@@ -108,14 +123,61 @@ export const useUpdateWishlist = () => {
 export const useDeleteWishlist = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (id: string) => {
-            const res = await fetch(`/api/wishlists/${id}`, { method: 'DELETE' });
-            if (!res.ok) throw new Error('Failed to delete wishlist');
-            return res.json();
+        mutationFn: (id: string) => sdk.wishlists.delete(id),
+        onMutate: async (id) => {
+            await queryClient.cancelQueries({ queryKey: ['wishlists'] });
+            const previousWishlists = queryClient.getQueryData(['wishlists']);
+            queryClient.setQueryData(['wishlists'], (old: any) => {
+                if (!old) return old;
+                return old.filter((w: any) => w.id !== id);
+            });
+            return { previousWishlists };
         },
-        onSuccess: () => {
+        onError: (err, id, context: any) => {
+            queryClient.setQueryData(['wishlists'], context?.previousWishlists);
+        },
+        onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['wishlists'] });
             queryClient.invalidateQueries({ queryKey: ['products'] });
+        }
+    });
+};
+
+export const useAddProductToWishlist = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ wishlistId, savedProductId }: { wishlistId: string; savedProductId: string }) =>
+            sdk.wishlists.addProduct(wishlistId, savedProductId),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['wishlists', variables.wishlistId, 'products'] });
+            queryClient.invalidateQueries({ queryKey: ['wishlists'] });
+        }
+    });
+};
+
+export const useRemoveProductFromWishlist = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ wishlistId, savedProductId }: { wishlistId: string; savedProductId: string }) =>
+            sdk.wishlists.removeProduct(wishlistId, savedProductId),
+        onMutate: async ({ wishlistId, savedProductId }) => {
+            await queryClient.cancelQueries({ queryKey: ['wishlists', wishlistId, 'products'] });
+            const previousData = queryClient.getQueryData(['wishlists', wishlistId, 'products']);
+            queryClient.setQueryData(['wishlists', wishlistId, 'products'], (old: any) => {
+                if (!old || !old.products) return old;
+                return {
+                    ...old,
+                    products: old.products.filter((p: any) => (p.savedProductId || p.id) !== savedProductId)
+                };
+            });
+            return { previousData };
+        },
+        onError: (err, variables, context: any) => {
+            queryClient.setQueryData(['wishlists', variables.wishlistId, 'products'], context?.previousData);
+        },
+        onSettled: (_, __, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['wishlists', variables.wishlistId, 'products'] });
+            queryClient.invalidateQueries({ queryKey: ['wishlists'] });
         }
     });
 };

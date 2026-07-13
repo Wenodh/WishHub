@@ -12,7 +12,6 @@ export class WishlistItemRepository {
         },
       },
       create: {
-        id: item.id,
         wishlistId: item.wishlistId,
         savedProductId: item.savedProductId,
         createdAt: item.createdAt,
