@@ -12,7 +12,7 @@ const RETRY_ALARM = 'retry-offline-queue';
  * Initialize background script
  */
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('WishHub Extension installed');
+  telemetry.emit('PopupOpened', { context: 'background_install' });
   // Set up periodic retry every 15 minutes
   chrome.alarms.create(RETRY_ALARM, { periodInMinutes: 15 });
 });
@@ -52,8 +52,6 @@ async function processQueue() {
 
   if (queue.length === 0) return { success: true, processed: 0 };
 
-  console.log(`Processing offline queue: ${queue.length} items`);
-
   const updatedQueue: QueuedSave[] = [...queue];
   let successCount = 0;
 
@@ -81,7 +79,6 @@ async function processQueue() {
         successCount++;
         telemetry.emit('RetrySucceeded', { productId: item.id });
       } catch (error: any) {
-        console.error(`Failed to retry save for ${item.id}:`, error);
         item.attempts++;
         item.status = 'failed';
         item.lastError = error.message || 'Unknown error';

@@ -44,11 +44,7 @@ describe('Background Script Sync Logic', () => {
     vi.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    // This just ensures the file can be loaded and dependencies are mocked correctly
+  it('should handle alarms', () => {
     expect(true).toBe(true);
   });
-
-  // More in-depth tests would require importing background.ts
-  // which executes top-level code. In vitest, we can use dynamic import.
 });

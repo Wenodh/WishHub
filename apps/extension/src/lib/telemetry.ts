@@ -11,15 +11,11 @@ export type TelemetryEvent =
 
 class ExtensionTelemetry {
   emit(event: TelemetryEvent, properties?: Record<string, any>) {
-    // In a real production app, we would use coreTelemetry.track(event, properties)
-    // For now, we delegate to logger and prepare for full integration
-    console.log(`[Telemetry] ${event}`, properties);
-
     try {
-        // We use the core logger which might be configured with different providers
+        // Use the core telemetry logger for structured logging
         coreTelemetry.logger.info(`Extension event: ${event}`, properties);
     } catch (e) {
-        // Silently fail telemetry
+        // Silently fail telemetry in extension to avoid blocking user flow
     }
   }
 }

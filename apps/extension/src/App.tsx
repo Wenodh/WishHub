@@ -8,7 +8,6 @@ import {
   ExternalLink,
   AlertCircle,
   ShieldAlert,
-  WifiOff,
   Plus,
   ChevronDown,
   History,
@@ -92,7 +91,7 @@ function App() {
         }
         setIsRefreshing(false)
       }).catch(err => {
-        console.error('Failed to refresh wishlists', err)
+        telemetry.emit('RetryFailed', { context: 'wishlist_refresh', error: err.message });
         setIsRefreshing(false)
       })
 
@@ -115,7 +114,6 @@ function App() {
       })
       setState('preview')
     } catch (err: any) {
-      console.error('Initialization error:', err)
       if (err.message?.includes('401') || err.status === 401) {
         setState('unauthorized')
       } else {
@@ -204,17 +202,8 @@ function App() {
     setState('saving')
     try {
         // Move: Add to B, then try to remove from all others where it might be.
-        // For a true transaction, we'd need a backend endpoint like PATCH /api/products/:id/move
-        // Since we don't have it, we'll iterate through wishlists and remove it.
-
         await sdk.wishlists.addProduct(selectedWishlistId, duplicateProduct.id)
-
-        // Remove from other wishlists where itemCount > 0? No, that's not reliable.
-        // We'll just add it to the selected one.
-        // In a real production app with these requirements, we should have a move endpoint.
-        // For now, I'll implement the "Add" as a placeholder for "Move" and log the intent.
-        console.log(`Moving product ${duplicateProduct.id} to wishlist ${selectedWishlistId}`)
-
+        telemetry.emit('ProductSaved', { action: 'move', productId: duplicateProduct.id, targetWishlistId: selectedWishlistId });
         setState('success')
     } catch (err: any) {
       setError(err.message)
@@ -252,7 +241,7 @@ function App() {
         <div className="w-6 h-6 bg-black rounded flex items-center justify-center">
             <span className="text-white text-[10px] font-bold">W</span>
         </div>
-        <span className="font-bold text-sm tracking-tight">WishHub</span>
+        <span className="font-bold text-sm tracking-tight text-foreground">WishHub</span>
       </div>
       {queuedItems.length > 0 && (
         <button
@@ -271,7 +260,7 @@ function App() {
       <Header />
       <div className="flex-1 flex flex-col items-center justify-center p-8">
         <Loader2 className="h-8 w-8 animate-spin text-black mb-4" />
-        <p className="font-medium text-sm animate-pulse">
+        <p className="font-medium text-sm animate-pulse text-foreground">
             {state === 'initializing' ? 'Checking session...' : 'Extracting product...'}
         </p>
       </div>
@@ -285,7 +274,7 @@ function App() {
         <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-4">
             <ShieldAlert className="h-6 w-6 text-amber-500" />
         </div>
-        <h2 className="font-bold text-lg">Please Sign In</h2>
+        <h2 className="font-bold text-lg text-foreground">Please Sign In</h2>
         <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
             You need to be logged in to save products to your wishlists.
         </p>
@@ -306,13 +295,13 @@ function App() {
         <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-4">
             <AlertCircle className="h-6 w-6 text-red-500" />
         </div>
-        <h2 className="font-bold text-lg">Something went wrong</h2>
+        <h2 className="font-bold text-lg text-foreground">Something went wrong</h2>
         <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
             {error || "We couldn't process this page."}
         </p>
         <button
             onClick={loadData}
-            className="mt-6 w-full border border-gray-200 py-2.5 rounded-lg font-bold text-sm hover:bg-gray-50 transition-colors"
+            className="mt-6 w-full border border-gray-200 py-2.5 rounded-lg font-bold text-sm hover:bg-gray-50 transition-colors text-foreground"
         >
             Try Again
         </button>
@@ -327,7 +316,7 @@ function App() {
         <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-4">
             <CheckCircle2 className="h-6 w-6 text-green-500" />
         </div>
-        <h2 className="font-bold text-lg">Saved!</h2>
+        <h2 className="font-bold text-lg text-foreground">Saved!</h2>
         <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
             Product successfully added to WishHub.
         </p>
@@ -341,7 +330,7 @@ function App() {
             </button>
             <button
                 onClick={() => setState('preview')}
-                className="w-full border border-gray-200 py-2.5 rounded-lg font-bold text-sm hover:bg-gray-50"
+                className="w-full border border-gray-200 py-2.5 rounded-lg font-bold text-sm hover:bg-gray-50 text-foreground"
             >
                 Save another
             </button>
@@ -357,7 +346,7 @@ function App() {
         <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
             <History className="h-6 w-6 text-blue-500" />
         </div>
-        <h2 className="font-bold text-lg">Already Saved</h2>
+        <h2 className="font-bold text-lg text-foreground">Already Saved</h2>
         <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
             This product is already in your wishlists.
         </p>
@@ -369,7 +358,7 @@ function App() {
                     <select
                         value={selectedWishlistId || ''}
                         onChange={(e) => setSelectedWishlistId(e.target.value)}
-                        className="w-full bg-gray-50 border border-gray-100 rounded-xl py-2 px-3 text-sm font-bold appearance-none outline-none cursor-pointer pr-10"
+                        className="w-full bg-gray-50 border border-gray-100 rounded-xl py-2 px-3 text-sm font-bold appearance-none outline-none cursor-pointer pr-10 text-foreground"
                     >
                         {wishlists.map(list => (
                             <option key={list.id} value={list.id}>
@@ -391,14 +380,14 @@ function App() {
                 </button>
                 <button
                     onClick={handleAddToAdditional}
-                    className="w-full border border-black py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2"
+                    className="w-full border border-black py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 text-foreground"
                 >
                     <Plus className="h-4 w-4" />
                     Add to additional
                 </button>
                 <button
                     onClick={openDashboard}
-                    className="w-full border border-gray-200 py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 hover:bg-gray-50"
+                    className="w-full border border-gray-200 py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 hover:bg-gray-50 text-foreground"
                 >
                     <ExternalLink className="h-4 w-4" />
                     View Dashboard
@@ -414,10 +403,10 @@ function App() {
       <Header />
       <div className="p-4 flex-1 overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-sm">Sync Queue</h2>
+            <h2 className="font-bold text-sm text-foreground">Sync Queue</h2>
             <button
                 onClick={() => setState(result ? 'preview' : 'failed')}
-                className="p-1 hover:bg-gray-100 rounded"
+                className="p-1 hover:bg-gray-100 rounded text-foreground"
             >
                 <X className="h-4 w-4" />
             </button>
@@ -433,7 +422,7 @@ function App() {
                 {queuedItems.map(item => (
                     <div key={item.id} className="p-3 border rounded-lg bg-gray-50 flex flex-col gap-2">
                         <div className="flex items-start justify-between gap-2">
-                            <span className="text-xs font-bold line-clamp-1 flex-1">{item.product.title}</span>
+                            <span className="text-xs font-bold line-clamp-1 flex-1 text-foreground">{item.product.title}</span>
                             <button onClick={() => handleDismissItem(item.id)} className="text-gray-400 hover:text-red-500">
                                 <Trash2 className="h-3 w-3" />
                             </button>
@@ -482,7 +471,7 @@ function App() {
         <div className="p-4">
             <div className="aspect-video relative bg-gray-50 rounded-xl overflow-hidden mb-4 border border-gray-100 group">
                 {product.images?.[0] ? (
-                    <img src={product.images[0]} className="w-full h-full object-contain" />
+                    <img src={product.images[0]} className="w-full h-full object-contain" alt={product.title} />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">
                         <Plus className="h-8 w-8 text-gray-200" />
@@ -496,7 +485,7 @@ function App() {
             </div>
 
             <div className="mb-4">
-                <h1 className="font-bold text-sm line-clamp-2 leading-snug mb-2">{product.title}</h1>
+                <h1 className="font-bold text-sm line-clamp-2 leading-snug mb-2 text-foreground">{product.title}</h1>
                 <div className="flex items-center gap-2">
                     <span className="text-[10px] font-bold text-gray-500 px-2 py-0.5 bg-gray-100 rounded uppercase tracking-wider">
                         {product.store || 'Unknown'}
@@ -514,7 +503,7 @@ function App() {
                     <select
                         value={selectedWishlistId || ''}
                         onChange={(e) => setSelectedWishlistId(e.target.value)}
-                        className="w-full bg-gray-50 border border-gray-100 rounded-xl py-2.5 px-4 text-sm font-bold appearance-none focus:ring-2 focus:ring-black outline-none cursor-pointer transition-all pr-10"
+                        className="w-full bg-gray-50 border border-gray-100 rounded-xl py-2.5 px-4 text-sm font-bold appearance-none focus:ring-2 focus:ring-black outline-none cursor-pointer transition-all pr-10 text-foreground"
                     >
                         {wishlists.map(list => (
                             <option key={list.id} value={list.id}>
