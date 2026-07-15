@@ -19,6 +19,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Applications**: Initialized apps for Web (Next.js), Docs (Fumadocs), Extension (Vite), and Mobile (Expo).
 - **Architecture**: Comprehensive documentation including ADRs, roadmap, and technical debt register.
 
+## [1.0.0] - 2026-07-14
+
+### Added
+- **Multi-Wishlist Support**: Users can now organize products into multiple custom collections.
+- **Production-Ready Extension**: Enhanced browser extension with background sync, offline queue, and robust duplicate detection.
+- **Price Tracking Foundation**: Integrated new scalable data model separating global Catalog products from user Saved products.
+- **Performance**: Optimized dashboard load times and extension startup (<200ms) with stale-while-revalidate caching.
+- **Accessibility**: Achieved WCAG 2.2 AA targets across web and extension platforms.
+- **Security**: Hardened authentication (Better Auth) and ownership-based authorization.
+- **Documentation**: Comprehensive technical docs for API, Database, Performance, and Security.
+
+### Changed
+- **Architecture**: Implemented "single-scrape, many-users" price tracking model (ADR 004).
+- **Tooling**: Standardized telemetry and structured logging across the monorepo.
+
 ## [0.2.0] - 2025-07-02
 
 ### Added
