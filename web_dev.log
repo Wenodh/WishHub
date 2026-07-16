@@ -1,0 +1,17 @@
+
+> web@0.1.0 dev /app/apps/web
+> next dev --port 3000
+
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+✓ Ready in 611ms
+(node:1069009) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///app/apps/web/next.config.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /app/apps/web/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+○ Compiling / ...
+ GET / 200 in 4.2s (next.js: 3.8s, application-code: 420ms)
+ GET /login 200 in 1311ms (next.js: 1114ms, application-code: 196ms)
+ GET /signup 200 in 764ms (next.js: 693ms, application-code: 71ms)

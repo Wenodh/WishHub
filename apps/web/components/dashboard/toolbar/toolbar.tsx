@@ -77,6 +77,7 @@ export function Toolbar() {
             size="icon"
             onClick={() => handleView('grid')}
             className={cn("h-9 w-9 rounded-lg", view === 'grid' && "bg-background shadow-sm")}
+            title="Grid View"
           >
             <LayoutGrid className="h-4 w-4" />
             <span className="sr-only">Grid View</span>
@@ -86,6 +87,7 @@ export function Toolbar() {
             size="icon"
             onClick={() => handleView('list')}
             className={cn("h-9 w-9 rounded-lg", view === 'list' && "bg-background shadow-sm")}
+            title="List View"
           >
             <ListIcon className="h-4 w-4" />
             <span className="sr-only">List View</span>

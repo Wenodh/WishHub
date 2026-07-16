@@ -1,0 +1,15 @@
+
+> extension@0.1.0 dev /app/apps/extension
+> vite
+
+
+  VITE v5.4.21  ready in 293 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+7:10:44 PM [vite] hmr update /src/App.tsx, /src/index.css
+7:13:37 PM [vite] hmr update /src/App.tsx, /src/index.css
+3:46:51 PM [vite] page reload src/__tests__/background.spec.ts
+3:47:33 PM [vite] page reload src/background.ts
+3:47:37 PM [vite] hmr update /src/App.tsx, /src/index.css
+3:50:54 PM [vite] hmr update /src/App.tsx, /src/index.css
