@@ -50,18 +50,6 @@ export function ProductDetailDrawer({
   const url = product.url || product.catalogProduct?.canonicalUrl;
   const addedAt = product.addedAt || product.createdAt;
 
-  // Premium Simulated Historical pricing (calculated based on actual price)
-  const numericPrice = parseFloat(price || '99');
-  const historicalHigh = (numericPrice * 1.18).toFixed(2);
-  const historicalLow = (numericPrice * 0.92).toFixed(2);
-  const totalDropPercent = 18;
-
-  // Mock Recommendations / Related Items
-  const relatedItems = [
-    { id: '1', title: `Premium Leather Organizer`, price: '45.00', store: store },
-    { id: '2', title: `Minimalist Travel Tech Case`, price: '68.00', store: store },
-    { id: '3', title: `Anodized Desk Light`, price: '120.00', store: store }
-  ];
 
   return (
     <AnimatePresence>
@@ -183,30 +171,18 @@ export function ProductDetailDrawer({
                 <div className="p-5 rounded-3xl border border-neutral-200/50 dark:border-neutral-800/50 bg-neutral-50/40 dark:bg-neutral-900/10 space-y-4">
                   <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500">Price Intelligence</h3>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-1">
-                      <span className="text-[10px] text-neutral-400 font-semibold uppercase tracking-wider block">Current</span>
+                      <span className="text-[10px] text-neutral-400 font-semibold uppercase tracking-wider block">Current Price</span>
                       <span className="text-lg font-black text-neutral-900 dark:text-white block">
                         {currency}{price}
                       </span>
                     </div>
-                    <div className="space-y-1 border-l border-neutral-200 dark:border-neutral-800 pl-4">
-                      <span className="text-[10px] text-neutral-400 font-semibold uppercase tracking-wider block">Tracked High</span>
-                      <span className="text-lg font-bold text-red-500 dark:text-red-400 block">
-                        {currency}{historicalHigh}
-                      </span>
-                    </div>
-                    <div className="space-y-1 border-l border-neutral-200 dark:border-neutral-800 pl-4">
-                      <span className="text-[10px] text-neutral-400 font-semibold uppercase tracking-wider block">Tracked Low</span>
-                      <span className="text-lg font-bold text-green-500 dark:text-green-400 block">
-                        {currency}{historicalLow}
-                      </span>
-                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-xs font-bold text-green-600 dark:text-green-400 bg-green-500/5 p-3 rounded-2xl border border-green-500/10">
-                    <TrendingDown className="h-4 w-4 animate-bounce" />
-                    This item is currently priced {totalDropPercent}% below its average historical peak.
+                  <div className="flex items-center gap-2 text-xs font-bold text-neutral-500 dark:text-neutral-400 bg-neutral-100/50 dark:bg-neutral-900/50 p-3 rounded-2xl border border-neutral-200/10 dark:border-neutral-800/10">
+                    <Clock className="h-4 w-4" />
+                    Price tracking is active. No historical price changes captured yet.
                   </div>
                 </div>
               )}
@@ -216,30 +192,16 @@ export function ProductDetailDrawer({
                 <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500">Activity Timeline</h3>
 
                 <div className="relative border-l border-neutral-200 dark:border-neutral-800 ml-3.5 space-y-6">
-                  {/* Item 1 */}
+                  {/* Event: Product Saved */}
                   <div className="relative pl-6">
                     <div className="absolute left-[-7px] top-1.5 h-3.5 w-3.5 rounded-full bg-neutral-900 dark:bg-white border-4 border-neutral-50 dark:border-neutral-950" />
                     <div className="space-y-0.5">
                       <div className="text-xs font-bold text-neutral-900 dark:text-neutral-100 flex items-center gap-1.5">
-                        <CheckCircle2 className="h-3..5 w-3.5 text-green-500" />
-                        Added to Wishlist Workspace
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        Product saved to workspace
                       </div>
                       <span className="text-[10px] text-neutral-400 font-semibold">
                         Saved on {new Date(addedAt).toLocaleDateString()} at {new Date(addedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Item 2 */}
-                  <div className="relative pl-6">
-                    <div className="absolute left-[-7px] top-1.5 h-3.5 w-3.5 rounded-full bg-neutral-900 dark:bg-white border-4 border-neutral-50 dark:border-neutral-950" />
-                    <div className="space-y-0.5">
-                      <div className="text-xs font-bold text-neutral-900 dark:text-neutral-100 flex items-center gap-1.5">
-                        <Clock className="h-3.5 w-3.5 text-neutral-400" />
-                        Live Scraper Diagnostics Verified
-                      </div>
-                      <span className="text-[10px] text-neutral-400 font-semibold">
-                        Last ping completed 3 hours ago
                       </span>
                     </div>
                   </div>
@@ -250,26 +212,11 @@ export function ProductDetailDrawer({
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500">Recommended Additions</h3>
-                  <span className="text-[10px] font-bold text-neutral-400 flex items-center gap-1">
-                    See more <ArrowRight className="h-3.5 w-3.5" />
-                  </span>
                 </div>
 
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
-                  {relatedItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className="p-4 rounded-2xl border border-neutral-200/50 dark:border-neutral-800/50 bg-neutral-50/40 dark:bg-neutral-900/10 min-w-[200px] flex-shrink-0 space-y-2 hover:border-neutral-900 dark:hover:border-neutral-100 transition-all duration-300"
-                    >
-                      <Badge variant="secondary" className="text-[8px] font-extrabold uppercase px-1.5 py-0">
-                        {item.store}
-                      </Badge>
-                      <h4 className="font-bold text-xs truncate text-neutral-800 dark:text-neutral-200">{item.title}</h4>
-                      <div className="font-extrabold text-xs text-neutral-950 dark:text-white">
-                        ${item.price}
-                      </div>
-                    </div>
-                  ))}
+                <div className="p-6 text-center rounded-2xl border border-dashed border-neutral-200 dark:border-neutral-800 bg-neutral-50/20 dark:bg-neutral-900/5">
+                  <Sparkles className="h-5 w-5 text-neutral-300 mx-auto mb-2" />
+                  <p className="text-xs text-neutral-400 font-medium">Recommended additions coming soon based on your saved history.</p>
                 </div>
               </div>
 

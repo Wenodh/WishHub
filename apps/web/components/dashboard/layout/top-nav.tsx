@@ -25,6 +25,7 @@ import { useSession } from '@wishhub/api-client';
 import { ThemeToggle } from './theme-toggle';
 import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/api/auth-client';
+import Link from 'next/link';
 
 export function TopNav() {
   const { data: session } = useSession();
@@ -58,11 +59,8 @@ export function TopNav() {
         {/* Theme Switching Switcher */}
         <ThemeToggle />
 
-        <Button variant="ghost" size="icon" className="relative h-10 w-10 rounded-xl text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50 transition-all">
+        <Button variant="ghost" size="icon" className="relative h-10 w-10 rounded-xl text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50 transition-all" title="No unread notifications">
           <Bell className="h-5 w-5" />
-          <Badge className="absolute -right-0.5 -top-0.5 h-4 w-4 justify-center p-0 text-[9px] font-black bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 rounded-full border border-white dark:border-neutral-950">
-            3
-          </Badge>
         </Button>
 
         <div className="h-5 w-[1px] bg-neutral-200 dark:bg-neutral-800 mx-1" />
@@ -85,11 +83,15 @@ export function TopNav() {
           <DropdownMenuContent align="end" className="w-56 rounded-3xl p-2.5 shadow-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-xl">
             <DropdownMenuLabel className="text-xs font-black tracking-widest text-neutral-400 dark:text-neutral-500 uppercase px-2 py-1.5">My Account</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-neutral-100 dark:bg-neutral-900 my-1" />
-            <DropdownMenuItem className="rounded-2xl gap-2 cursor-pointer px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900">
-              <User className="h-4 w-4 text-neutral-400" /> Profile
+            <DropdownMenuItem asChild className="rounded-2xl gap-2 cursor-pointer px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900">
+              <Link href="/dashboard/profile">
+                <User className="h-4 w-4 text-neutral-400" /> Profile
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem className="rounded-2xl gap-2 cursor-pointer px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900">
-              <Settings className="h-4 w-4 text-neutral-400" /> Settings
+            <DropdownMenuItem asChild className="rounded-2xl gap-2 cursor-pointer px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900">
+              <Link href="/dashboard/settings">
+                <Settings className="h-4 w-4 text-neutral-400" /> Settings
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-neutral-100 dark:bg-neutral-900 my-1" />
             <DropdownMenuItem

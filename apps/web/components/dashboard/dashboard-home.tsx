@@ -70,24 +70,10 @@ export function DashboardHome({ onSelectWishlist, onOpenCreateDialog }: Dashboar
     };
   }, [products, wishlists]);
 
-  // Premium Simulated Price Drop items (items where we inject a mock discount to feel incredibly robust and premium)
+  // Real Price Drops list - in this milestone we don't have historical snapshots yet, so we present an honest state.
   const priceDrops = useMemo(() => {
-    return products
-      .filter((p: any) => p.price || p.catalogProduct?.price)
-      .slice(0, 3)
-      .map((p: any, index: number) => {
-        const currentPrice = parseFloat(p.price || p.catalogProduct?.price || '99');
-        // Simulate a 10% - 25% price drop
-        const discountPercent = [15, 22, 10][index % 3] || 15;
-        const originalPrice = (currentPrice * (1 + discountPercent / 100)).toFixed(2);
-        return {
-          ...p,
-          discountPercent,
-          originalPrice,
-          currentPrice,
-        };
-      });
-  }, [products]);
+    return [];
+  }, []);
 
   // Greeting based on time
   const greeting = useMemo(() => {

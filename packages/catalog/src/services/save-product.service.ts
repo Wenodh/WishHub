@@ -44,7 +44,10 @@ export class SaveProductService {
             userId,
             store: data.storeName || 'unknown'
         });
-        return ok(existingSaved);
+        return ok({
+          ...existingSaved,
+          isDuplicate: true,
+        });
       }
 
       const savedProduct = await productRepository.create(userId, catalogProduct.id, data.url);
