@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { authClient } from '@/lib/api/auth-client';
-import { Button, Input } from '@wishhub/ui';
+import { Button, Input, Label } from '@wishhub/ui';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Sparkles, ArrowLeft, User, Mail, Lock } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function SignupPage() {
   const [name, setName] = useState('');
@@ -35,63 +37,94 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-muted/30">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-xl border border-muted-foreground/10">
-        <div className="text-center space-y-2">
-            <h1 className="text-3xl font-black tracking-tight">Join WishHub</h1>
-            <p className="text-muted-foreground font-medium text-sm italic">Organize your shopping everywhere</p>
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12 bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-50 transition-colors duration-300 relative overflow-hidden">
+      {/* Glow backgrounds */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-neutral-200/50 dark:bg-neutral-900/30 blur-[100px] rounded-full pointer-events-none" />
+
+      {/* Back button */}
+      <Link href="/" className="absolute top-6 left-6 text-sm font-semibold text-neutral-500 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white flex items-center gap-1.5 transition-all">
+        <ArrowLeft className="h-4 w-4" />
+        Back to home
+      </Link>
+
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-md relative z-10"
+      >
+        <div className="p-8 sm:p-10 rounded-3xl border border-neutral-200/60 dark:border-neutral-800/60 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-xl premium-shadow space-y-8">
+          <div className="text-center space-y-2">
+              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 mb-2 shadow-md">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <h1 className="text-3xl font-black tracking-tight text-neutral-950 dark:text-white">Join WishHub</h1>
+              <p className="text-neutral-500 dark:text-neutral-400 font-semibold text-sm">Organize your shopping workspaces everywhere</p>
+          </div>
+
+          <form onSubmit={handleSignup} className="space-y-5">
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500 flex items-center gap-1.5">
+                <User className="h-3 w-3" /> Full Name
+              </Label>
+              <Input
+                placeholder="Alex Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="h-12 rounded-2xl"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500 flex items-center gap-1.5">
+                <Mail className="h-3 w-3" /> Email Address
+              </Label>
+              <Input
+                type="email"
+                placeholder="name@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="h-12 rounded-2xl"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500 flex items-center gap-1.5">
+                <Lock className="h-3 w-3" /> Password
+              </Label>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="h-12 rounded-2xl"
+              />
+            </div>
+
+            {error && (
+              <p className="text-xs text-red-600 dark:text-red-400 font-bold bg-red-500/5 p-3 rounded-2xl border border-red-500/10">
+                {error}
+              </p>
+            )}
+
+            <Button type="submit" className="w-full h-12 rounded-2xl font-bold text-sm shadow-lg shadow-black/10 dark:shadow-white/5 hover:scale-[1.01] transition-transform mt-2" disabled={loading}>
+              {loading ? 'Creating account...' : 'Create Account'}
+            </Button>
+          </form>
+
+          <div className="text-center pt-2">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">
+              Already have an account?{' '}
+              <Link href="/login" className="text-neutral-950 dark:text-white font-extrabold hover:underline underline-offset-4">
+                Sign In
+              </Link>
+            </p>
+          </div>
         </div>
-
-        <form onSubmit={handleSignup} className="space-y-4 pt-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Full Name</label>
-            <Input
-              placeholder="Alex Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="h-12 rounded-xl"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Email Address</label>
-            <Input
-              type="email"
-              placeholder="name@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="h-12 rounded-xl"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Password</label>
-            <Input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="h-12 rounded-xl"
-            />
-          </div>
-
-          {error && <p className="text-sm text-destructive font-bold bg-destructive/10 p-3 rounded-lg">{error}</p>}
-
-          <Button type="submit" className="w-full h-12 rounded-xl font-bold text-base shadow-lg shadow-primary/20" disabled={loading}>
-            {loading ? 'Creating account...' : 'Create Account'}
-          </Button>
-        </form>
-
-        <div className="text-center pt-2">
-          <p className="text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link href="/login" className="text-primary font-bold hover:underline underline-offset-4">
-              Sign In
-            </Link>
-          </p>
-        </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

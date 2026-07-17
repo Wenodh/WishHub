@@ -11,4 +11,5 @@ export * from './components/tabs';
 export * from './components/tooltip';
 export * from './components/skeleton';
 export * from './components/card';
+export * from './components/empty-state';
 export * from './lib/utils';

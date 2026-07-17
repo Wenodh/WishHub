@@ -8,13 +8,18 @@ import {
   Star,
   Plus,
   ChevronRight,
-  LayoutDashboard
+  Sparkles,
+  Command,
+  Compass,
+  FolderHeart,
+  Grid
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { cn } from '@wishhub/utils';
 import { CreateWishlistDialog } from '../dialogs/create-wishlist-dialog';
 import { Suspense } from 'react';
+import { motion } from 'framer-motion';
 
 interface WishlistSidebarProps {
   onClose?: () => void;
@@ -40,22 +45,24 @@ function SidebarNav({ onClose }: WishlistSidebarProps) {
       href={href}
       onClick={onClose}
       className={cn(
-        "group flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all",
+        "group relative flex items-center justify-between rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-300",
         isActive
-          ? "bg-primary text-primary-foreground shadow-sm"
-          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+          ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 shadow-md shadow-black/5 dark:shadow-white/5 scale-[1.02]"
+          : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-50 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50"
       )}
     >
       <div className="flex items-center gap-3 truncate">
-        <Icon className={cn("h-4 w-4", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground")} />
+        <Icon className={cn("h-4 w-4 transition-transform group-hover:scale-105", isActive ? "text-white dark:text-neutral-950" : "text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-neutral-50")} />
         <span className="truncate">{label}</span>
       </div>
       <div className="flex items-center gap-2">
-        {isDefault && <Star className={cn("h-3 w-3 fill-current", isActive ? "text-primary-foreground" : "text-primary")} />}
+        {isDefault && <Star className={cn("h-3 w-3 fill-yellow-400 text-yellow-400", isActive ? "" : "animate-pulse")} />}
         {count !== undefined && (
           <span className={cn(
-            "text-[10px] font-bold",
-            isActive ? "text-primary-foreground/80" : "text-muted-foreground/60"
+            "text-[10px] font-black px-2 py-0.5 rounded-md",
+            isActive
+              ? "bg-white/20 dark:bg-black/10 text-white dark:text-neutral-950"
+              : "bg-neutral-100 dark:bg-neutral-900 text-neutral-400 dark:text-neutral-500"
           )}>
             {count}
           </span>
@@ -66,22 +73,27 @@ function SidebarNav({ onClose }: WishlistSidebarProps) {
 
   return (
     <nav className="flex-1 space-y-8">
-      <div className="space-y-1">
+      <div className="space-y-1.5">
+        <div className="px-3 mb-2">
+          <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
+            Navigation
+          </h3>
+        </div>
         <NavItem
           href="/dashboard"
-          icon={Layers}
-          label="All Products"
+          icon={Grid}
+          label="Home Dashboard"
           isActive={!activeWishlistId}
         />
 
         {isLoading ? (
-          <div className="space-y-2 py-2">
-            <Skeleton className="h-8 w-full" />
+          <div className="space-y-2 py-1 px-1">
+            <Skeleton className="h-10 w-full rounded-xl" />
           </div>
         ) : defaultWishlist && (
           <NavItem
             href={`/dashboard?wishlist=${defaultWishlist.id}`}
-            icon={List}
+            icon={Compass}
             label={defaultWishlist.name}
             count={defaultWishlist.itemCount}
             isActive={activeWishlistId === defaultWishlist.id}
@@ -90,28 +102,28 @@ function SidebarNav({ onClose }: WishlistSidebarProps) {
         )}
       </div>
 
-      <div className="space-y-4">
-        <div className="flex items-center justify-between px-2">
-          <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-3">
+          <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
             Custom Wishlists
           </h3>
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           {isLoading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
+            <div className="space-y-2 px-1">
+              <Skeleton className="h-10 w-full rounded-xl" />
+              <Skeleton className="h-10 w-full rounded-xl" />
+              <Skeleton className="h-10 w-full rounded-xl" />
             </div>
           ) : customWishlists?.length === 0 ? (
-            <p className="px-3 py-4 text-xs text-muted-foreground italic">No custom wishlists yet.</p>
+            <p className="px-4 py-4 text-xs text-neutral-400 dark:text-neutral-500 italic font-medium">No custom folders yet.</p>
           ) : (
             customWishlists?.map((w) => (
               <NavItem
                 key={w.id}
                 href={`/dashboard?wishlist=${w.id}`}
-                icon={List}
+                icon={FolderHeart}
                 label={w.name}
                 count={w.itemCount}
                 isActive={activeWishlistId === w.id}
@@ -126,21 +138,30 @@ function SidebarNav({ onClose }: WishlistSidebarProps) {
 
 export function WishlistSidebar({ onClose }: WishlistSidebarProps) {
   return (
-    <div className="flex h-full flex-col p-4">
-      <div className="mb-8 px-2 py-4">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg">
-            <LayoutDashboard className="h-5 w-5" />
+    <div className="flex h-full flex-col p-6">
+      {/* Brand Logo Header */}
+      <div className="mb-10 px-2 py-3">
+        <Link href="/dashboard" className="flex items-center gap-3 group">
+          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 shadow-lg transition-transform duration-500 group-hover:rotate-12">
+            <Sparkles className="h-4.5 w-4.5" />
           </div>
-          <span className="text-xl font-black tracking-tight text-foreground">WishHub</span>
+          <span className="text-xl font-black tracking-tight text-neutral-950 dark:text-white flex items-center gap-1.5">
+            WishHub
+            <span className="text-[9px] font-black bg-neutral-100 dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 px-1.5 py-0.5 rounded-md text-neutral-500">v4.0</span>
+          </span>
         </Link>
       </div>
 
-      <Suspense fallback={<div className="flex-1 space-y-4"><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /></div>}>
+      <Suspense fallback={
+        <div className="flex-1 space-y-4">
+          <Skeleton className="h-10 w-full rounded-xl" />
+          <Skeleton className="h-10 w-full rounded-xl" />
+        </div>
+      }>
         <SidebarNav onClose={onClose} />
       </Suspense>
 
-      <div className="mt-auto border-t pt-4">
+      <div className="mt-auto border-t border-neutral-100 dark:border-neutral-900 pt-6">
         <CreateWishlistDialog />
       </div>
     </div>
