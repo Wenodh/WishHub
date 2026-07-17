@@ -6,12 +6,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   Button,
   Input,
   Label
 } from '@wishhub/ui';
-import { Trash2, Star } from 'lucide-react';
+import { Trash2, Star, Edit3, Settings, ShieldAlert } from 'lucide-react';
 import { useUpdateWishlist, useDeleteWishlist, useSetDefaultWishlist } from '@wishhub/api-client';
 import { useRouter } from 'next/navigation';
 
@@ -65,57 +64,72 @@ export function WishlistSettingsDialog({ open, onOpenChange, wishlist }: Wishlis
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[450px] p-8 rounded-3xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-black">Wishlist Settings</DialogTitle>
+          <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-2">
+            <Settings className="h-5 w-5 text-neutral-500" />
+            Wishlist Settings
+          </DialogTitle>
         </DialogHeader>
+
         <div className="space-y-8 py-4">
+          {/* Rename Section */}
           <form onSubmit={handleUpdate} className="space-y-2">
-            <Label htmlFor="edit-name" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Rename Wishlist
+            <Label htmlFor="edit-name" className="text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500 flex items-center gap-1.5">
+              <Edit3 className="h-3 w-3" /> Rename Wishlist
             </Label>
             <div className="flex gap-2">
-                <Input
-                    id="edit-name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="h-12 text-lg focus-visible:ring-primary flex-1"
-                />
-                <Button type="submit" className="h-12 px-6 font-bold" disabled={!name.trim() || update.isPending || name === wishlist.name}>
-                    Save
-                </Button>
+              <Input
+                id="edit-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="h-12 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-300 rounded-2xl flex-1 text-sm font-semibold"
+              />
+              <Button
+                type="submit"
+                className="h-12 px-6 font-extrabold rounded-2xl shadow-md active:scale-95 transition-all text-xs"
+                disabled={!name.trim() || update.isPending || name === wishlist.name}
+              >
+                Save
+              </Button>
             </div>
           </form>
 
+          {/* Preferences Section */}
           {!wishlist.isDefault && (
-              <div className="space-y-2">
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Preferences</Label>
-                  <Button
-                    variant="outline"
-                    className="w-full h-12 justify-start gap-3 rounded-xl border-primary/20 hover:bg-primary/5 hover:text-primary transition-all group"
-                    onClick={handleSetDefault}
-                    disabled={setDefault.isPending}
-                  >
-                    <Star className="h-4 w-4 text-primary group-hover:fill-primary" />
-                    Set as Default Wishlist
-                  </Button>
-              </div>
+            <div className="space-y-2.5">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500 block">
+                Preferences
+              </Label>
+              <Button
+                variant="outline"
+                className="w-full h-12 justify-start gap-3 rounded-2xl border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-all font-bold text-xs"
+                onClick={handleSetDefault}
+                disabled={setDefault.isPending}
+              >
+                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                Set as Default Wishlist
+              </Button>
+            </div>
           )}
 
-          <div className="space-y-2 pt-4 border-t border-muted/50">
-             <Label className="text-[10px] font-bold uppercase tracking-widest text-destructive/70">Danger Zone</Label>
-             <p className="text-xs text-muted-foreground mb-4">
-                Deleting a wishlist will not delete the products. They will still be available in "All Products".
+          {/* Danger Zone Section */}
+          <div className="space-y-3 pt-6 border-t border-neutral-100 dark:border-neutral-900">
+             <Label className="text-[10px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 flex items-center gap-1.5">
+               <ShieldAlert className="h-4 w-4" /> Danger Zone
+             </Label>
+             <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
+                Deleting a wishlist will not delete the products. They will still be available in your core workspace feed.
              </p>
              <Button
-                variant="ghost"
-                className="w-full h-12 justify-start gap-3 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/5"
+                variant="destructive"
+                className="w-full h-12 justify-start gap-3 rounded-2xl text-xs font-bold shadow-md hover:scale-[1.01] transition-transform"
                 onClick={handleDelete}
                 disabled={del.isPending}
-            >
+             >
                 <Trash2 className="h-4 w-4" />
                 Delete Wishlist Permanently
-            </Button>
+             </Button>
           </div>
         </div>
       </DialogContent>

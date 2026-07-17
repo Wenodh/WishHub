@@ -16,6 +16,7 @@
     "@radix-ui/react-tooltip": "^1.2.12",
     "@wishhub/utils": "workspace:*",
     "clsx": "^2.1.1",
+    "framer-motion": "11.18.2",
     "lucide-react": "^0.460.0",
     "tailwind-merge": "^2.6.1",
     "tailwindcss-animate": "^1.0.7"
