@@ -50,8 +50,11 @@ export async function POST(req: Request): Promise<NextResponse> {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
+    const isDuplicate = !!result.value.isDuplicate;
+
     return NextResponse.json({
         product: result.value,
+        duplicate: isDuplicate,
     }, { status: 201 });
   } catch (error: any) {
     console.error('API Error:', error);

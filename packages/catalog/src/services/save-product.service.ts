@@ -44,7 +44,29 @@ export class SaveProductService {
             userId,
             store: data.storeName || 'unknown'
         });
-        return ok(existingSaved);
+        return ok({
+          ...existingSaved,
+          isDuplicate: true,
+        });
+      }
+
+      // Enqueue PENDING AI Job if no active/completed job exists for this catalog product
+      const { prisma } = await import('@wishhub/database');
+      const existingJob = await prisma.aIJob.findFirst({
+        where: {
+          catalogProductId: catalogProduct.id,
+          status: { in: ['PENDING', 'PROCESSING', 'COMPLETED'] }
+        }
+      });
+
+      if (!existingJob) {
+        await prisma.aIJob.create({
+          data: {
+            catalogProductId: catalogProduct.id,
+            status: 'PENDING',
+            priority: 1,
+          }
+        });
       }
 
       const savedProduct = await productRepository.create(userId, catalogProduct.id, data.url);

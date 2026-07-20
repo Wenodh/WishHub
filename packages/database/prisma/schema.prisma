@@ -34,9 +34,68 @@ model CatalogProduct {
   updatedAt    DateTime @updatedAt
 
   savedBy SavedProduct[]
+  insights ProductInsight[]
+  tags     ProductTag[]
+  aiJobs   AIJob[]
 
   @@index([canonicalUrl])
   @@index([store, externalId])
+}
+
+model ProductInsight {
+  id               String         @id @default(cuid())
+  catalogProductId String
+  catalogProduct   CatalogProduct @relation(fields: [catalogProductId], references: [id], onDelete: Cascade)
+  summary          String?
+  pros             Json           @default("[]")
+  cons             Json           @default("[]")
+  buyRecommendation String?
+  confidenceScore  Float?
+  reasoning        String?
+  provider         String
+  model            String
+  promptVersion    String
+  contentFingerprint String
+  metadata         Json           @default("{}")
+  generatedAt      DateTime       @default(now())
+  expiresAt        DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@unique([catalogProductId, promptVersion])
+  @@index([catalogProductId])
+}
+
+model ProductTag {
+  id               String         @id @default(cuid())
+  catalogProductId String
+  catalogProduct   CatalogProduct @relation(fields: [catalogProductId], references: [id], onDelete: Cascade)
+  name             String
+
+  @@unique([catalogProductId, name])
+  @@index([catalogProductId])
+}
+
+model AIJob {
+  id               String         @id @default(cuid())
+  catalogProductId String
+  catalogProduct   CatalogProduct @relation(fields: [catalogProductId], references: [id], onDelete: Cascade)
+  status           String         @default("PENDING")
+  priority         Int            @default(0)
+  attempts         Int            @default(0)
+  maxAttempts      Int            @default(3)
+  lockedAt         DateTime?
+  lockedBy         String?
+  retryAfter       DateTime?
+  processingTime   Int?
+  errorLog         String?
+  tokenUsage       Json           @default("{}")
+  estimatedCost    Float          @default(0.0)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([status])
+  @@index([catalogProductId])
 }
 
 model SavedProduct {

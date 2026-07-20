@@ -189,3 +189,51 @@ export const useSession = () => {
     queryFn: () => sdk.auth.getSession(),
   });
 };
+
+// AI Insights
+export const useProductInsights = (id: string | null) => {
+  return useQuery({
+    queryKey: ['products', id, 'insights'],
+    queryFn: async () => {
+      if (!id) return null;
+      const res = await fetch(`/api/products/${id}/insights`);
+      if (!res.ok) throw new Error('Failed to fetch insights');
+      return res.json();
+    },
+    enabled: !!id,
+    refetchInterval: (query) => {
+      const data = query.state.data as any;
+      if (data?.status === 'generating' || data?.status === 'pending') {
+        return 3000;
+      }
+      return false;
+    }
+  });
+};
+
+export const useProductSimilar = (id: string | null) => {
+  return useQuery({
+    queryKey: ['products', id, 'similar'],
+    queryFn: async () => {
+      if (!id) return null;
+      const res = await fetch(`/api/products/${id}/similar`);
+      if (!res.ok) throw new Error('Failed to fetch similar products');
+      return res.json();
+    },
+    enabled: !!id,
+  });
+};
+
+export const useRegenerateProductInsights = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/products/${id}/regenerate`, { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to regenerate insights');
+      return res.json();
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['products', id, 'insights'] });
+    }
+  });
+};

@@ -7,12 +7,14 @@
     "build": "pnpm --filter @wishhub/database db:generate && next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.2",
     "@wishhub/api-client": "workspace:*",
     "@wishhub/auth": "workspace:*",
+    "@wishhub/ai": "workspace:*",
     "@wishhub/catalog": "workspace:*",
     "@wishhub/constants": "workspace:*",
     "@wishhub/contracts": "workspace:*",
@@ -41,6 +43,7 @@
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",
     "@vitejs/plugin-react": "^4.3.3",
+    "vite": "^5.4.10",
     "@wishhub/config": "workspace:*",
     "@wishhub/core": "workspace:^",
     "@wishhub/telemetry": "workspace:^",
