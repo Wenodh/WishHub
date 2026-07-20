@@ -7,6 +7,14 @@ import { urlNormalizerService } from '../services/url-normalizer.service';
 vi.mock('../repository');
 vi.mock('../repository/catalog.repository');
 vi.mock('../services/url-normalizer.service');
+vi.mock('@wishhub/database', () => ({
+  prisma: {
+    aIJob: {
+      findFirst: vi.fn().mockResolvedValue(null),
+      create: vi.fn().mockResolvedValue({}),
+    }
+  }
+}));
 vi.mock('@wishhub/telemetry', () => ({
   telemetry: {
     logger: {

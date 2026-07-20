@@ -14,7 +14,8 @@ import {
   X,
   RefreshCw,
   Trash2,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Sparkles
 } from 'lucide-react'
 import { getStorage, updateStorage, QueuedSave } from './lib/storage'
 import { telemetry } from './lib/telemetry'
@@ -44,6 +45,36 @@ function App() {
   const [queuedItems, setQueuedItems] = useState<QueuedSave[]>([])
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [duplicateProduct, setDuplicateProduct] = useState<any>(null)
+
+  const [aiResult, setAiResult] = useState<any>(null)
+  const [aiStatus, setAiStatus] = useState<string>('pending')
+
+  const pollInsights = (productId: string) => {
+    setAiStatus('pending')
+    let attempts = 0
+    const interval = setInterval(async () => {
+      attempts++
+      if (attempts > 15) { // Stop after 45 seconds
+        clearInterval(interval)
+        return
+      }
+      try {
+        const res = await fetch(`${API_URL}/api/products/${productId}/insights`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data.status === 'completed') {
+            setAiResult(data.insight)
+            setAiStatus('completed')
+            clearInterval(interval)
+          } else {
+            setAiStatus('generating')
+          }
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }, 3000)
+  }
 
   const loadData = useCallback(async () => {
     try {
@@ -158,6 +189,9 @@ function App() {
       } else {
         setState('success')
         telemetry.emit('ProductSaved', { store: result.product.store })
+        if (response.product?.id) {
+          pollInsights(response.product.id)
+        }
       }
     } catch (err: any) {
       if (err.status === 401) {
@@ -310,17 +344,58 @@ function App() {
   )
 
   if (state === 'success') return (
-    <div className="w-80 flex flex-col bg-white">
+    <div className="w-80 flex flex-col bg-white animate-in fade-in duration-300">
       <Header />
-      <div className="p-6 flex flex-col items-center text-center">
-        <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-4">
+      <div className="p-5 flex flex-col items-center text-center space-y-4">
+        <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center">
             <CheckCircle2 className="h-6 w-6 text-green-500" />
         </div>
-        <h2 className="font-bold text-lg text-foreground">Saved!</h2>
-        <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+        <h2 className="font-bold text-lg text-foreground leading-none">Saved!</h2>
+        <p className="text-xs text-muted-foreground leading-none">
             Product successfully added to WishHub.
         </p>
-        <div className="flex flex-col gap-2 w-full mt-6">
+
+        {/* AI Analysis Integration */}
+        <div className="w-full border border-neutral-100 rounded-xl p-4 bg-neutral-50/50 text-left space-y-3">
+          <div className="flex items-center gap-1.5">
+            <Sparkles className="h-4 w-4 text-yellow-500 animate-pulse" />
+            <span className="text-[11px] font-black uppercase tracking-wider text-foreground">AI Intelligence</span>
+          </div>
+
+          {aiStatus !== 'completed' ? (
+            <div className="flex items-center gap-2 py-1">
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-neutral-500" />
+              <p className="text-xs text-neutral-500 font-semibold animate-pulse">
+                AI is analyzing this product...
+              </p>
+            </div>
+          ) : aiResult ? (
+            <div className="space-y-2.5">
+              <p className="text-xs text-neutral-600 leading-relaxed font-medium">
+                {aiResult.summary}
+              </p>
+
+              <div className="flex items-center justify-between pt-1 border-t border-neutral-100">
+                <span className="text-[10px] font-bold text-neutral-400">RECOMMENDATION</span>
+                <span className="text-xs font-black text-green-600">
+                  {aiResult.buyRecommendation}
+                </span>
+              </div>
+
+              {aiResult.tags && aiResult.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 pt-1.5 border-t border-neutral-100">
+                  {aiResult.tags.slice(0, 3).map((tag: string) => (
+                    <span key={tag} className="bg-neutral-100 text-neutral-600 text-[9px] font-bold px-1.5 py-0.5 rounded">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col gap-2 w-full pt-1">
             <button
                 onClick={openDashboard}
                 className="w-full bg-black text-white py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 hover:bg-black/90"
@@ -329,7 +404,7 @@ function App() {
                 View Dashboard
             </button>
             <button
-                onClick={() => setState('preview')}
+                onClick={() => { setAiResult(null); setAiStatus('pending'); setState('preview'); }}
                 className="w-full border border-gray-200 py-2.5 rounded-lg font-bold text-sm hover:bg-gray-50 text-foreground"
             >
                 Save another

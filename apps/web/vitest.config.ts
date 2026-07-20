@@ -15,6 +15,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './'),
       '@wishhub/telemetry': path.resolve(__dirname, '../../packages/telemetry/src/index.ts'),
       '@wishhub/auth': path.resolve(__dirname, '../../packages/auth/src/index.ts'),
+      '@wishhub/ai': path.resolve(__dirname, '../../packages/ai/src/index.ts'),
       '@wishhub/wishlist': path.resolve(__dirname, '../../packages/wishlist/src/index.ts'),
       '@wishhub/core': path.resolve(__dirname, '../../packages/core/src/index.ts'),
       '@wishhub/database': path.resolve(__dirname, '../../packages/database/src/index.ts'),

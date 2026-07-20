@@ -19,7 +19,9 @@ import {
   Copy,
   Check
 } from 'lucide-react';
-import { Button, Badge, Avatar } from '@wishhub/ui';
+import { Button, Badge, Avatar, Skeleton } from '@wishhub/ui';
+import { useProductInsights, useProductSimilar, useRegenerateProductInsights } from '@wishhub/api-client';
+import { cn } from '@wishhub/utils';
 
 interface ProductDetailDrawerProps {
   isOpen: boolean;
@@ -40,7 +42,15 @@ export function ProductDetailDrawer({
   isCopied,
   onCopy
 }: ProductDetailDrawerProps) {
+  const { data: insightsData } = useProductInsights(product?.id);
+  const { data: similarData, isLoading: similarLoading } = useProductSimilar(product?.id);
+  const regenerateMutation = useRegenerateProductInsights();
+
   if (!product) return null;
+
+  const isGenerating = insightsData?.status === 'generating' || insightsData?.status === 'pending';
+  const insight = insightsData?.insight;
+  const tags = insightsData?.tags || [];
 
   const title = product.title || product.catalogProduct?.title || product.name || 'Curated Product';
   const store = product.store || product.catalogProduct?.storeName || product.storeName || 'Store';
@@ -119,6 +129,15 @@ export function ProductDetailDrawer({
                   <h2 className="text-2xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50 leading-tight">
                     {title}
                   </h2>
+                  {tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {tags.map((t: string) => (
+                        <Badge key={t} variant="secondary" className="bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 font-semibold text-[10px] rounded-lg px-2.5 py-0.5">
+                          {t}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                   <p className="text-xs text-neutral-400 font-medium leading-relaxed">
                     Originally saved from <span className="underline font-semibold">{store}</span>. Continuous real-time updates monitor this pricing model.
                   </p>
@@ -166,9 +185,142 @@ export function ProductDetailDrawer({
                 </Button>
               </div>
 
+              {/* AI Insights Section */}
+              <div className="space-y-6 pt-6 border-t border-neutral-100 dark:border-neutral-900">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500 flex items-center gap-1.5">
+                    <Sparkles className="h-4 w-4 text-yellow-500 animate-pulse" />
+                    AI Shopping Insights
+                  </h3>
+                </div>
+
+                {isGenerating ? (
+                  <div className="p-6 rounded-3xl border border-neutral-200/50 dark:border-neutral-800/50 bg-neutral-50/40 dark:bg-neutral-900/10 space-y-4 animate-pulse">
+                    <div className="h-4 w-1/3 bg-neutral-200 dark:bg-neutral-800 rounded-lg" />
+                    <div className="h-5 w-full bg-neutral-200 dark:bg-neutral-800 rounded-lg" />
+                    <div className="h-4 w-3/4 bg-neutral-200 dark:bg-neutral-800 rounded-lg" />
+                  </div>
+                ) : insight ? (
+                  <div className="space-y-6">
+                    {/* Summary Block */}
+                    <div className="p-6 rounded-3xl border border-neutral-200/40 dark:border-neutral-800/40 bg-white dark:bg-neutral-950/40 shadow-sm leading-relaxed text-sm text-neutral-700 dark:text-neutral-300 font-medium">
+                      {insight.summary}
+                    </div>
+
+                    {/* Buy Recommendation */}
+                    <div className="p-6 rounded-3xl border border-neutral-200/40 dark:border-neutral-800/40 bg-neutral-50/30 dark:bg-neutral-900/5 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black uppercase tracking-widest text-neutral-400">Recommendation</span>
+                        <Badge className={cn(
+                          "font-black text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-lg",
+                          insight.buyRecommendation === 'Good Buy' ? 'bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-300' :
+                          insight.buyRecommendation === 'Consider Waiting' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300' :
+                          'bg-neutral-100 text-neutral-800 dark:bg-neutral-900 dark:text-neutral-300'
+                        )}>
+                          {insight.buyRecommendation}
+                        </Badge>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-black text-neutral-900 dark:text-white">
+                          {Math.round((insight.confidenceScore || 0) * 100)}%
+                        </span>
+                        <span className="text-xs text-neutral-400 font-bold uppercase tracking-wider">Match Confidence</span>
+                      </div>
+                      <p className="text-xs text-neutral-600 dark:text-neutral-400 font-medium leading-relaxed">
+                        {insight.reasoning}
+                      </p>
+                    </div>
+
+                    {/* Pros & Cons */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="p-5 rounded-3xl border border-green-500/10 bg-green-500/5 space-y-3">
+                        <h4 className="text-xs font-black uppercase tracking-widest text-green-600 dark:text-green-400">Pros</h4>
+                        <ul className="space-y-2 text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+                          {Array.isArray(insight.pros) && insight.pros.map((pro: string, i: number) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                              <span>{pro}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="p-5 rounded-3xl border border-red-500/10 bg-red-500/5 space-y-3">
+                        <h4 className="text-xs font-black uppercase tracking-widest text-red-600 dark:text-red-400">Cons</h4>
+                        <ul className="space-y-2 text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+                          {Array.isArray(insight.cons) && insight.cons.map((con: string, i: number) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <X className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
+                              <span>{con}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+
+                    {/* Regenerate Trigger Button */}
+                    <div className="flex justify-end pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={regenerateMutation.isPending}
+                        onClick={() => regenerateMutation.mutate(product.id)}
+                        className="rounded-xl font-bold text-xs gap-2"
+                      >
+                        <Clock className={cn("h-4 w-4", regenerateMutation.isPending && "animate-spin")} />
+                        {regenerateMutation.isPending ? 'Regenerating...' : 'Regenerate AI Analysis'}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-6 text-center rounded-3xl border border-dashed border-neutral-200 dark:border-neutral-800 bg-neutral-50/20 dark:bg-neutral-900/5">
+                    <Sparkles className="h-5 w-5 text-neutral-400 mx-auto mb-2" />
+                    <p className="text-xs text-neutral-500 font-medium">No AI Insights generated yet.</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={regenerateMutation.isPending}
+                      onClick={() => regenerateMutation.mutate(product.id)}
+                      className="mt-3 rounded-xl font-bold text-xs"
+                    >
+                      {regenerateMutation.isPending ? 'Generating...' : 'Analyze with AI'}
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Similar Products */}
+              <div className="space-y-4 pt-6 border-t border-neutral-100 dark:border-neutral-900">
+                <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500">Similar Products</h3>
+                {similarLoading ? (
+                  <div className="flex gap-4 overflow-x-auto pb-2">
+                    <Skeleton className="h-20 w-44 rounded-2xl" />
+                    <Skeleton className="h-20 w-44 rounded-2xl" />
+                  </div>
+                ) : similarData?.similar && similarData.similar.length > 0 ? (
+                  <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
+                    {similarData.similar.map((item: any) => (
+                      <div
+                        key={item.id}
+                        className="p-4 rounded-2xl border border-neutral-200/50 dark:border-neutral-800/50 bg-neutral-50/40 dark:bg-neutral-900/10 min-w-[200px] flex-shrink-0 space-y-2"
+                      >
+                        <Badge variant="secondary" className="text-[8px] font-extrabold uppercase px-1.5 py-0">
+                          {item.store}
+                        </Badge>
+                        <h4 className="font-bold text-xs truncate text-neutral-800 dark:text-neutral-200">{item.title}</h4>
+                        <div className="font-extrabold text-xs text-neutral-950 dark:text-white">
+                          ${(item.metadata as any)?.price || 'unspecified'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-neutral-400 italic">No similar products discovered in your wishlists yet.</p>
+                )}
+              </div>
+
               {/* Pricing breakdown insights */}
               {price && (
-                <div className="p-5 rounded-3xl border border-neutral-200/50 dark:border-neutral-800/50 bg-neutral-50/40 dark:bg-neutral-900/10 space-y-4">
+                <div className="p-5 rounded-3xl border border-neutral-200/50 dark:border-neutral-800/50 bg-neutral-50/40 dark:bg-neutral-900/10 space-y-4 pt-6 border-t border-neutral-100 dark:border-neutral-900">
                   <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500">Price Intelligence</h3>
 
                   <div className="grid grid-cols-1 gap-4">
@@ -188,7 +340,7 @@ export function ProductDetailDrawer({
               )}
 
               {/* Activity Track Timeline */}
-              <div className="space-y-4">
+              <div className="space-y-4 pt-6 border-t border-neutral-100 dark:border-neutral-900">
                 <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500">Activity Timeline</h3>
 
                 <div className="relative border-l border-neutral-200 dark:border-neutral-800 ml-3.5 space-y-6">
@@ -205,18 +357,6 @@ export function ProductDetailDrawer({
                       </span>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Related Curated Browse Section */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500">Recommended Additions</h3>
-                </div>
-
-                <div className="p-6 text-center rounded-2xl border border-dashed border-neutral-200 dark:border-neutral-800 bg-neutral-50/20 dark:bg-neutral-900/5">
-                  <Sparkles className="h-5 w-5 text-neutral-300 mx-auto mb-2" />
-                  <p className="text-xs text-neutral-400 font-medium">Recommended additions coming soon based on your saved history.</p>
                 </div>
               </div>
 
