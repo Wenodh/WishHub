@@ -17,12 +17,19 @@ describe('Toolbar', () => {
   });
 
   it('updates URL on search input change', () => {
+    vi.useFakeTimers();
     render(<Toolbar />);
     const input = screen.getByPlaceholderText('Search items...');
 
     fireEvent.change(input, { target: { value: 'headphones' } });
 
-    expect(push).toHaveBeenCalledWith(expect.stringContaining('search=headphones'));
+    vi.advanceTimersByTime(150);
+
+    expect(push).toHaveBeenCalledWith(
+      expect.stringContaining('search=headphones'),
+      expect.objectContaining({ scroll: false })
+    );
+    vi.useRealTimers();
   });
 
   it('updates URL on view toggle', () => {

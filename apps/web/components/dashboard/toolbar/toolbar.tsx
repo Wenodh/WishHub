@@ -21,7 +21,7 @@ import {
   DropdownMenuRadioItem
 } from '@wishhub/ui';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { cn } from '@wishhub/utils';
 
 export function Toolbar() {
@@ -29,9 +29,15 @@ export function Toolbar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const search = searchParams.get('search') || '';
+  const searchParam = searchParams.get('search') || '';
+  const [localSearch, setLocalSearch] = useState(searchParam);
   const sort = searchParams.get('sort') || 'newest';
   const view = searchParams.get('view') || 'grid';
+
+  // Sync local input with query param changes (e.g., when clearing search or switching folders)
+  useEffect(() => {
+    setLocalSearch(searchParam);
+  }, [searchParam]);
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -46,9 +52,16 @@ export function Toolbar() {
     [searchParams]
   );
 
-  const handleSearch = (term: string) => {
-    router.push(`${pathname}?${createQueryString('search', term)}`);
-  };
+  // Debounce search input to avoid choking the router on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localSearch !== searchParam) {
+        router.push(`${pathname}?${createQueryString('search', localSearch)}`, { scroll: false });
+      }
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [localSearch, searchParam, router, pathname, createQueryString]);
 
   const handleSort = (value: string) => {
     router.push(`${pathname}?${createQueryString('sort', value)}`);
@@ -64,8 +77,8 @@ export function Toolbar() {
         <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" />
         <Input
           placeholder="Search items..."
-          value={search}
-          onChange={(e) => handleSearch(e.target.value)}
+          value={localSearch}
+          onChange={(e) => setLocalSearch(e.target.value)}
           className="h-12 pl-11 rounded-2xl border-neutral-200 dark:border-neutral-800 bg-white/70 dark:bg-neutral-950/70 focus-visible:ring-neutral-950 dark:focus-visible:ring-neutral-300 shadow-sm"
         />
       </div>

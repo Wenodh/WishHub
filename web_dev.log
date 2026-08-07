@@ -5,13 +5,42 @@
 ▲ Next.js 16.2.10 (Turbopack)
 - Local:         http://localhost:3000
 - Network:       http://192.168.0.2:3000
-✓ Ready in 611ms
-(node:1069009) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///app/apps/web/next.config.js is not specified and it doesn't parse as CommonJS.
+✓ Ready in 550ms
+(node:188451) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///app/apps/web/next.config.js is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to /app/apps/web/package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
 
 ○ Compiling / ...
- GET / 200 in 4.2s (next.js: 3.8s, application-code: 420ms)
- GET /login 200 in 1311ms (next.js: 1114ms, application-code: 196ms)
- GET /signup 200 in 764ms (next.js: 693ms, application-code: 71ms)
+⚠ ./packages/config/tailwind/index.js
+Specified module format (EcmaScript Modules) is not matching the module format of the source code (CommonJs)
+The EcmaScript module format was specified in the package.json that is affecting this source file or by using an special extension, but it looks like that CommonJs syntax is used in the source code.
+Exports made by CommonJs syntax will lead to a runtime error, since the module is in EcmaScript mode. Either change the "type" field in the package.json or replace CommonJs syntax with EcmaScript import/export syntax in the source file.
+
+
+ HEAD / 200 in 8.1s (next.js: 7.5s, application-code: 539ms)
+⚠ ./packages/config/tailwind/index.js
+Specified module format (EcmaScript Modules) is not matching the module format of the source code (CommonJs)
+The EcmaScript module format was specified in the package.json that is affecting this source file or by using an special extension, but it looks like that CommonJs syntax is used in the source code.
+Exports made by CommonJs syntax will lead to a runtime error, since the module is in EcmaScript mode. Either change the "type" field in the package.json or replace CommonJs syntax with EcmaScript import/export syntax in the source file.
+
+
+ GET / 200 in 145ms (next.js: 14ms, application-code: 131ms)
+⚠ ./packages/config/tailwind/index.js
+Specified module format (EcmaScript Modules) is not matching the module format of the source code (CommonJs)
+The EcmaScript module format was specified in the package.json that is affecting this source file or by using an special extension, but it looks like that CommonJs syntax is used in the source code.
+Exports made by CommonJs syntax will lead to a runtime error, since the module is in EcmaScript mode. Either change the "type" field in the package.json or replace CommonJs syntax with EcmaScript import/export syntax in the source file.
+
+
+⚠ ./packages/config/tailwind/index.js
+Specified module format (EcmaScript Modules) is not matching the module format of the source code (CommonJs)
+The EcmaScript module format was specified in the package.json that is affecting this source file or by using an special extension, but it looks like that CommonJs syntax is used in the source code.
+Exports made by CommonJs syntax will lead to a runtime error, since the module is in EcmaScript mode. Either change the "type" field in the package.json or replace CommonJs syntax with EcmaScript import/export syntax in the source file.
+
+
+ GET / 200 in 123ms (next.js: 7ms, application-code: 116ms)
+⚠ ./packages/config/tailwind/index.js
+Specified module format (EcmaScript Modules) is not matching the module format of the source code (CommonJs)
+The EcmaScript module format was specified in the package.json that is affecting this source file or by using an special extension, but it looks like that CommonJs syntax is used in the source code.
+Exports made by CommonJs syntax will lead to a runtime error, since the module is in EcmaScript mode. Either change the "type" field in the package.json or replace CommonJs syntax with EcmaScript import/export syntax in the source file.
