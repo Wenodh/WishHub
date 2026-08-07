@@ -1,14 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { withApiHandler } from '@/lib/api/handler';
+import { ApiResponse } from '@/lib/api/responses';
 import { prisma } from '@wishhub/database';
-import { auth } from '@wishhub/auth';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await auth.api.getSession({ headers: req.headers });
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
+export const GET = withApiHandler(async (req, { params, session }) => {
   const { id } = await params;
 
   // Find the user's saved product
@@ -18,7 +12,7 @@ export async function GET(
   });
 
   if (!savedProduct || savedProduct.userId !== session.user.id) {
-    return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    return ApiResponse.notFound('Product not found');
   }
 
   // Fetch the latest product insight
@@ -41,18 +35,16 @@ export async function GET(
   const jobStatus = aiJob?.status || 'PENDING';
 
   if (!insight) {
-    return NextResponse.json({
-      success: true,
+    return ApiResponse.success({
       status: jobStatus === 'PROCESSING' ? 'generating' : 'pending',
       insight: null,
       tags: []
     });
   }
 
-  return NextResponse.json({
-    success: true,
+  return ApiResponse.success({
     status: 'completed',
     insight,
     tags: tags.map(t => t.name)
   });
-}
+});

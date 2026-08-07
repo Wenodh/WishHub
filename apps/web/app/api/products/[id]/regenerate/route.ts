@@ -1,14 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { withApiHandler } from '@/lib/api/handler';
+import { ApiResponse } from '@/lib/api/responses';
 import { prisma } from '@wishhub/database';
-import { auth } from '@wishhub/auth';
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await auth.api.getSession({ headers: req.headers });
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
+export const POST = withApiHandler(async (req, { params, session }) => {
   const { id } = await params;
 
   // Find the user's saved product
@@ -17,7 +11,7 @@ export async function POST(
   });
 
   if (!savedProduct || savedProduct.userId !== session.user.id) {
-    return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    return ApiResponse.notFound('Product not found');
   }
 
   // Delete existing ProductInsight for this catalog product
@@ -54,8 +48,7 @@ export async function POST(
     });
   }
 
-  return NextResponse.json({
-    success: true,
+  return ApiResponse.success({
     message: 'Regeneration job enqueued successfully.'
   });
-}
+});

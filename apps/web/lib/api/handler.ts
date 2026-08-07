@@ -9,7 +9,7 @@ export type ApiHandler = (
 ) => Promise<NextResponse>;
 
 export function withApiHandler(handler: ApiHandler) {
-  return async (req: NextRequest, { params }: { params: any }) => {
+  return async (req: NextRequest, { params }: { params: any } = { params: {} }) => {
     const requestId = crypto.randomUUID();
     const startTime = Date.now();
     const { pathname } = new URL(req.url);

@@ -1,17 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@wishhub/auth';
+import { withApiHandler } from '@/lib/api/handler';
+import { ApiResponse } from '@/lib/api/responses';
 import {
   listProductsService,
   saveProductService
 } from '@wishhub/catalog';
 import { CreateProductRequestSchema, PaginationSchema } from '@wishhub/contracts';
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
-  const session = await auth.api.getSession({ headers: req.headers });
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export const GET = withApiHandler(async (req, { session }) => {
   const { searchParams } = new URL(req.url);
   const paginationResult = PaginationSchema.safeParse({
     limit: Number(searchParams.get('limit')) || undefined,
@@ -19,49 +14,38 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   });
 
   if (!paginationResult.success) {
-    return NextResponse.json({ error: 'Invalid pagination parameters' }, { status: 400 });
+    return ApiResponse.badRequest('Invalid pagination parameters');
   }
 
   const result = await listProductsService.execute(session.user.id, paginationResult.data);
 
   if (!result.ok) {
-    return NextResponse.json({ error: result.error }, { status: 500 });
+    const errMsg = (result.error as any) instanceof Error ? (result.error as any).message : String(result.error);
+    return ApiResponse.internalServerError(errMsg);
   }
 
-  return NextResponse.json({ products: result.value });
-}
+  return ApiResponse.success({ products: result.value });
+});
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
-  const session = await auth.api.getSession({ headers: req.headers });
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+export const POST = withApiHandler(async (req, { session }) => {
+  const body = await req.json();
+  const validationResult = CreateProductRequestSchema.safeParse(body);
+
+  if (!validationResult.success) {
+    return ApiResponse.badRequest('Validation Failed');
   }
 
-  try {
-    const body = await req.json();
-    const validationResult = CreateProductRequestSchema.safeParse(body);
+  const result = await saveProductService.execute(session.user.id, validationResult.data);
 
-    if (!validationResult.success) {
-      return NextResponse.json({
-        error: 'Validation Failed',
-        issues: validationResult.error.issues
-      }, { status: 400 });
-    }
-
-    const result = await saveProductService.execute(session.user.id, validationResult.data);
-
-    if (!result.ok) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
-    }
-
-    const isDuplicate = !!result.value.isDuplicate;
-
-    return NextResponse.json({
-        product: result.value,
-        duplicate: isDuplicate,
-    }, { status: 201 });
-  } catch (error: any) {
-    console.error('API Error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  if (!result.ok) {
+    const errMsg = (result.error as any) instanceof Error ? (result.error as any).message : String(result.error);
+    return ApiResponse.badRequest(errMsg);
   }
-}
+
+  const isDuplicate = !!result.value.isDuplicate;
+
+  return ApiResponse.created({
+    product: result.value,
+    duplicate: isDuplicate,
+  });
+});

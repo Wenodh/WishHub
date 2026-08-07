@@ -198,7 +198,8 @@ export const useProductInsights = (id: string | null) => {
       if (!id) return null;
       const res = await fetch(`/api/products/${id}/insights`);
       if (!res.ok) throw new Error('Failed to fetch insights');
-      return res.json();
+      const json = await res.json();
+      return json.success && json.data !== undefined ? json.data : json;
     },
     enabled: !!id,
     refetchInterval: (query) => {
@@ -218,7 +219,8 @@ export const useProductSimilar = (id: string | null) => {
       if (!id) return null;
       const res = await fetch(`/api/products/${id}/similar`);
       if (!res.ok) throw new Error('Failed to fetch similar products');
-      return res.json();
+      const json = await res.json();
+      return json.success && json.data !== undefined ? json.data : json;
     },
     enabled: !!id,
   });
@@ -230,7 +232,8 @@ export const useRegenerateProductInsights = () => {
     mutationFn: async (id: string) => {
       const res = await fetch(`/api/products/${id}/regenerate`, { method: 'POST' });
       if (!res.ok) throw new Error('Failed to regenerate insights');
-      return res.json();
+      const json = await res.json();
+      return json.success && json.data !== undefined ? json.data : json;
     },
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['products', id, 'insights'] });
