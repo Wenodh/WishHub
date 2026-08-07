@@ -27,7 +27,7 @@ describe('POST /api/products', () => {
     vi.mocked(auth.api.getSession).mockResolvedValue(null);
     const req = new Request('http://localhost/api/products', { method: 'POST' });
 
-    const res = await POST(req);
+    const res = await POST(req as any);
     expect(res.status).toBe(401);
   });
 
@@ -44,7 +44,7 @@ describe('POST /api/products', () => {
       body: JSON.stringify(body),
     });
 
-    const res = await POST(req);
+    const res = await POST(req as any);
     const data = await res.json();
 
     expect(res.status).toBe(201);
@@ -60,7 +60,7 @@ describe('POST /api/products', () => {
       body: JSON.stringify({ name: '' }), // Invalid URL and name
     });
 
-    const res = await POST(req);
+    const res = await POST(req as any);
     expect(res.status).toBe(400);
   });
 });

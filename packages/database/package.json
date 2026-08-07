@@ -8,6 +8,9 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "dependencies": {
     "@prisma/client": "^5.22.0"
   },
