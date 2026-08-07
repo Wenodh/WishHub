@@ -6,6 +6,17 @@ import { telemetry } from '@wishhub/telemetry';
 export async function POST(req: Request) {
   const start = Date.now();
 
+  // Verify Authorization if CRON_SECRET is configured
+  if (process.env.CRON_SECRET) {
+    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized execution attempt.' } },
+        { status: 401 }
+      );
+    }
+  }
+
   // Find next unclaimed/pending job or failed job with remaining attempts
   const job = await prisma.aIJob.findFirst({
     where: {
