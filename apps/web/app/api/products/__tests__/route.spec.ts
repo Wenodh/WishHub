@@ -48,7 +48,8 @@ describe('POST /api/products', () => {
     const data = await res.json();
 
     expect(res.status).toBe(201);
-    expect(data.product).toEqual(product);
+    expect(data.success).toBe(true);
+    expect(data.data.product).toEqual(product);
   });
 
   it('should return 400 if validation fails', async () => {

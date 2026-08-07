@@ -10,7 +10,8 @@ export class ProductSDK {
 
     const res = await fetch(`${this.baseUrl}/api/products?${searchParams.toString()}`);
     if (!res.ok) throw new Error('Failed to list products');
-    return res.json();
+    const json = await res.json();
+    return json.success && json.data !== undefined ? json.data : json;
   }
 
   async save(data: any) {
@@ -20,7 +21,8 @@ export class ProductSDK {
       body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error('Failed to save product');
-    return res.json();
+    const json = await res.json();
+    return json.success && json.data !== undefined ? json.data : json;
   }
 
   async delete(id: string): Promise<DeleteResponse> {
@@ -28,6 +30,7 @@ export class ProductSDK {
       method: 'DELETE',
     });
     if (!res.ok) throw new Error('Failed to delete product');
-    return res.json();
+    const json = await res.json();
+    return json.success && json.data !== undefined ? json.data : json;
   }
 }

@@ -61,7 +61,8 @@ function App() {
       try {
         const res = await fetch(`${API_URL}/api/products/${productId}/insights`)
         if (res.ok) {
-          const data = await res.json()
+          const json = await res.json()
+          const data = json.success && json.data !== undefined ? json.data : json
           if (data.status === 'completed') {
             setAiResult(data.insight)
             setAiStatus('completed')

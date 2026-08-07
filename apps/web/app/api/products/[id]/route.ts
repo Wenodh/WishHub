@@ -1,24 +1,15 @@
-import { NextResponse } from 'next/server';
-import { auth } from '@wishhub/auth';
+import { withApiHandler } from '@/lib/api/handler';
+import { ApiResponse } from '@/lib/api/responses';
 import { deleteProductService } from '@wishhub/catalog';
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await auth.api.getSession({ headers: req.headers });
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+export const DELETE = withApiHandler(async (req, { params, session }) => {
+  const { id } = await params;
+  const result = await deleteProductService.execute(session.user.id, id);
 
-  try {
-    const { id } = await params;
-    const result = await deleteProductService.execute(session.user.id, id);
-
-    if (!result.ok) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
-    }
-
-    return NextResponse.json({ success: true }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  if (!result.ok) {
+    const errMsg = (result.error as any) instanceof Error ? (result.error as any).message : String(result.error);
+    return ApiResponse.badRequest(errMsg);
   }
-}
+
+  return ApiResponse.success({ success: true });
+});
