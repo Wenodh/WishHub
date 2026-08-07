@@ -271,17 +271,17 @@ function App() {
   // --- Render Helpers ---
 
   const Header = () => (
-    <div className="px-4 py-3 border-b flex items-center justify-between bg-white sticky top-0 z-10">
-      <div className="flex items-center gap-2">
-        <div className="w-6 h-6 bg-black rounded flex items-center justify-center">
-            <span className="text-white text-[10px] font-bold">W</span>
+    <div className="px-4 py-3.5 border-b border-border flex items-center justify-between bg-background sticky top-0 z-10">
+      <div className="flex items-center gap-2.5">
+        <div className="w-7 h-7 bg-primary rounded-xl flex items-center justify-center shadow-lg transition-transform hover:scale-105">
+          <Sparkles className="text-primary-foreground h-4 w-4" />
         </div>
-        <span className="font-bold text-sm tracking-tight text-foreground">WishHub</span>
+        <span className="font-extrabold text-sm tracking-tight text-foreground">WishHub</span>
       </div>
       {queuedItems.length > 0 && (
         <button
             onClick={() => setState('offline_queue')}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-amber-50 text-amber-600 text-[10px] font-bold hover:bg-amber-100 transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 text-[10px] font-extrabold hover:bg-amber-500/20 transition-all active:scale-95"
         >
             <History className="h-3 w-3" />
             {queuedItems.length} {queuedItems.length === 1 ? 'item' : 'items'}
@@ -291,102 +291,108 @@ function App() {
   )
 
   if (state === 'initializing' || state === 'extracting') return (
-    <div className="w-80 h-[400px] flex flex-col bg-white">
+    <div className="w-80 h-[400px] flex flex-col bg-background text-foreground">
       <Header />
-      <div className="flex-1 flex flex-col items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-black mb-4" />
-        <p className="font-medium text-sm animate-pulse text-foreground">
-            {state === 'initializing' ? 'Checking session...' : 'Extracting product...'}
+      <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-foreground opacity-70" />
+        <p className="font-bold text-xs animate-pulse text-muted-foreground uppercase tracking-widest text-center">
+            {state === 'initializing' ? 'Verifying session...' : 'Extracting metadata...'}
         </p>
       </div>
     </div>
   )
 
   if (state === 'unauthorized') return (
-    <div className="w-80 flex flex-col bg-white">
+    <div className="w-80 flex flex-col bg-background text-foreground">
       <Header />
-      <div className="p-6 flex flex-col items-center text-center">
-        <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-4">
-            <ShieldAlert className="h-6 w-6 text-amber-500" />
+      <div className="p-6 flex flex-col items-center text-center space-y-4">
+        <div className="w-14 h-14 bg-amber-500/10 rounded-2xl flex items-center justify-center">
+            <ShieldAlert className="h-7 w-7 text-amber-500" />
         </div>
-        <h2 className="font-bold text-lg text-foreground">Please Sign In</h2>
-        <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-            You need to be logged in to save products to your wishlists.
-        </p>
+        <div className="space-y-1">
+          <h2 className="font-black text-lg text-foreground tracking-tight">Access Required</h2>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+              Connect your WishHub account to capture products straight to your collections.
+          </p>
+        </div>
         <button
             onClick={openLogin}
-            className="mt-6 w-full bg-black text-white py-2.5 rounded-lg font-bold text-sm hover:bg-black/90 transition-colors"
+            className="w-full bg-primary text-primary-foreground py-3 rounded-2xl font-bold text-sm hover:opacity-95 transition-all active:scale-[0.98] shadow-lg shadow-primary/10"
         >
-            Sign In to WishHub
+            Connect Account
         </button>
       </div>
     </div>
   )
 
   if (state === 'failed') return (
-    <div className="w-80 flex flex-col bg-white">
+    <div className="w-80 flex flex-col bg-background text-foreground">
       <Header />
-      <div className="p-6 flex flex-col items-center text-center">
-        <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-4">
-            <AlertCircle className="h-6 w-6 text-red-500" />
+      <div className="p-6 flex flex-col items-center text-center space-y-4">
+        <div className="w-14 h-14 bg-destructive/10 rounded-2xl flex items-center justify-center">
+            <AlertCircle className="h-7 w-7 text-destructive" />
         </div>
-        <h2 className="font-bold text-lg text-foreground">Something went wrong</h2>
-        <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-            {error || "We couldn't process this page."}
-        </p>
+        <div className="space-y-1">
+          <h2 className="font-black text-lg text-foreground tracking-tight">Process Failed</h2>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+              {error || "We couldn't analyze the merchant data on this page."}
+          </p>
+        </div>
         <button
             onClick={loadData}
-            className="mt-6 w-full border border-gray-200 py-2.5 rounded-lg font-bold text-sm hover:bg-gray-50 transition-colors text-foreground"
+            className="w-full border border-border bg-muted/30 py-3 rounded-2xl font-bold text-sm hover:bg-muted transition-all text-foreground active:scale-[0.98]"
         >
-            Try Again
+            Retry Extraction
         </button>
       </div>
     </div>
   )
 
   if (state === 'success') return (
-    <div className="w-80 flex flex-col bg-white animate-in fade-in duration-300">
+    <div className="w-80 flex flex-col bg-background text-foreground animate-in fade-in duration-300">
       <Header />
       <div className="p-5 flex flex-col items-center text-center space-y-4">
-        <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center">
-            <CheckCircle2 className="h-6 w-6 text-green-500" />
+        <div className="w-14 h-14 bg-green-500/10 rounded-2xl flex items-center justify-center">
+            <CheckCircle2 className="h-7 w-7 text-green-500" />
         </div>
-        <h2 className="font-bold text-lg text-foreground leading-none">Saved!</h2>
-        <p className="text-xs text-muted-foreground leading-none">
-            Product successfully added to WishHub.
-        </p>
+        <div className="space-y-1">
+          <h2 className="font-black text-lg text-foreground tracking-tight">Saved to Curation!</h2>
+          <p className="text-xs text-muted-foreground leading-none">
+              Your item is safely secured.
+          </p>
+        </div>
 
         {/* AI Analysis Integration */}
-        <div className="w-full border border-neutral-100 rounded-xl p-4 bg-neutral-50/50 text-left space-y-3">
+        <div className="w-full border border-border rounded-2xl p-4 bg-muted/30 text-left space-y-3 shadow-sm">
           <div className="flex items-center gap-1.5">
             <Sparkles className="h-4 w-4 text-yellow-500 animate-pulse" />
-            <span className="text-[11px] font-black uppercase tracking-wider text-foreground">AI Intelligence</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">AI Intelligence Summary</span>
           </div>
 
           {aiStatus !== 'completed' ? (
             <div className="flex items-center gap-2 py-1">
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-neutral-500" />
-              <p className="text-xs text-neutral-500 font-semibold animate-pulse">
-                AI is analyzing this product...
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+              <p className="text-xs text-muted-foreground font-semibold animate-pulse">
+                Analyzing and optimizing product pricing...
               </p>
             </div>
           ) : aiResult ? (
             <div className="space-y-2.5">
-              <p className="text-xs text-neutral-600 leading-relaxed font-medium">
+              <p className="text-xs text-foreground/80 leading-relaxed font-medium">
                 {aiResult.summary}
               </p>
 
-              <div className="flex items-center justify-between pt-1 border-t border-neutral-100">
-                <span className="text-[10px] font-bold text-neutral-400">RECOMMENDATION</span>
-                <span className="text-xs font-black text-green-600">
+              <div className="flex items-center justify-between pt-2 border-t border-border">
+                <span className="text-[9px] font-black tracking-widest text-muted-foreground uppercase">RECOMMENDATION</span>
+                <span className="text-xs font-black text-green-500 uppercase tracking-wider">
                   {aiResult.buyRecommendation}
                 </span>
               </div>
 
               {aiResult.tags && aiResult.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 pt-1.5 border-t border-neutral-100">
+                <div className="flex flex-wrap gap-1 pt-2 border-t border-border">
                   {aiResult.tags.slice(0, 3).map((tag: string) => (
-                    <span key={tag} className="bg-neutral-100 text-neutral-600 text-[9px] font-bold px-1.5 py-0.5 rounded">
+                    <span key={tag} className="bg-muted text-muted-foreground text-[9px] font-bold px-2 py-0.5 rounded-lg border border-border">
                       {tag}
                     </span>
                   ))}
@@ -396,19 +402,19 @@ function App() {
           ) : null}
         </div>
 
-        <div className="flex flex-col gap-2 w-full pt-1">
+        <div className="flex flex-col gap-2 w-full pt-2">
             <button
                 onClick={openDashboard}
-                className="w-full bg-black text-white py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 hover:bg-black/90"
+                className="w-full bg-primary text-primary-foreground py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-95 shadow-lg shadow-primary/10 active:scale-[0.98] transition-all"
             >
                 <ExternalLink className="h-4 w-4" />
-                View Dashboard
+                Open Dashboard
             </button>
             <button
                 onClick={() => { setAiResult(null); setAiStatus('pending'); setState('preview'); }}
-                className="w-full border border-gray-200 py-2.5 rounded-lg font-bold text-sm hover:bg-gray-50 text-foreground"
+                className="w-full border border-border bg-muted/40 py-3 rounded-2xl font-bold text-sm hover:bg-muted text-foreground active:scale-[0.98] transition-all"
             >
-                Save another
+                Add another item
             </button>
         </div>
       </div>
@@ -416,25 +422,27 @@ function App() {
   )
 
   if (state === 'duplicate') return (
-    <div className="w-80 flex flex-col bg-white">
+    <div className="w-80 flex flex-col bg-background text-foreground">
       <Header />
-      <div className="p-6 flex flex-col items-center text-center">
-        <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-            <History className="h-6 w-6 text-blue-500" />
+      <div className="p-6 flex flex-col items-center text-center space-y-4">
+        <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center">
+            <History className="h-7 w-7 text-blue-500" />
         </div>
-        <h2 className="font-bold text-lg text-foreground">Already Saved</h2>
-        <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-            This product is already in your wishlists.
-        </p>
+        <div className="space-y-1">
+          <h2 className="font-black text-lg text-foreground tracking-tight">Already Saved</h2>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+              This product is already stored in your curated collection.
+          </p>
+        </div>
 
-        <div className="w-full mt-6 space-y-3">
+        <div className="w-full mt-2 space-y-4">
             <div className="text-left">
-                <label className="text-[10px] font-bold uppercase text-gray-400 mb-1.5 block tracking-widest">Select Wishlist</label>
+                <label className="text-[10px] font-black uppercase text-muted-foreground mb-1.5 block tracking-widest">Select target collection</label>
                 <div className="relative">
                     <select
                         value={selectedWishlistId || ''}
                         onChange={(e) => setSelectedWishlistId(e.target.value)}
-                        className="w-full bg-gray-50 border border-gray-100 rounded-xl py-2 px-3 text-sm font-bold appearance-none outline-none cursor-pointer pr-10 text-foreground"
+                        className="w-full bg-muted border border-border rounded-2xl py-2.5 px-4 text-sm font-bold appearance-none outline-none cursor-pointer pr-10 text-foreground focus:ring-1 focus:ring-foreground transition-all"
                     >
                         {wishlists.map(list => (
                             <option key={list.id} value={list.id}>
@@ -442,31 +450,31 @@ function App() {
                             </option>
                         ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
             </div>
 
             <div className="flex flex-col gap-2 pt-2">
                 <button
                     onClick={handleMoveToWishlist}
-                    className="w-full bg-black text-white py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2"
+                    className="w-full bg-primary text-primary-foreground py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-primary/10 active:scale-[0.98] transition-all"
                 >
                     <ArrowRightLeft className="h-4 w-4" />
-                    Move to this wishlist
+                    Move to this collection
                 </button>
                 <button
                     onClick={handleAddToAdditional}
-                    className="w-full border border-black py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 text-foreground"
+                    className="w-full border border-border bg-muted/40 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 text-foreground active:scale-[0.98] hover:bg-muted transition-all"
                 >
                     <Plus className="h-4 w-4" />
-                    Add to additional
+                    Add to additional list
                 </button>
                 <button
                     onClick={openDashboard}
-                    className="w-full border border-gray-200 py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 hover:bg-gray-50 text-foreground"
+                    className="w-full border border-border bg-muted/20 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-muted text-foreground active:scale-[0.98] transition-all"
                 >
                     <ExternalLink className="h-4 w-4" />
-                    View Dashboard
+                    Open Dashboard
                 </button>
             </div>
         </div>
@@ -475,47 +483,49 @@ function App() {
   )
 
   if (state === 'offline_queue') return (
-    <div className="w-80 flex flex-col h-[450px] bg-white">
+    <div className="w-80 flex flex-col h-[450px] bg-background text-foreground">
       <Header />
-      <div className="p-4 flex-1 overflow-y-auto">
-        <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-sm text-foreground">Sync Queue</h2>
+      <div className="p-4 flex-1 overflow-y-auto space-y-4">
+        <div className="flex items-center justify-between">
+            <h2 className="font-black text-sm text-foreground tracking-tight">Sync Queue</h2>
             <button
                 onClick={() => setState(result ? 'preview' : 'failed')}
-                className="p-1 hover:bg-gray-100 rounded text-foreground"
+                className="p-1 hover:bg-muted rounded-xl text-foreground"
             >
                 <X className="h-4 w-4" />
             </button>
         </div>
 
         {queuedItems.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-                <CheckCircle2 className="h-8 w-8 text-gray-300 mb-2" />
-                <p className="text-sm text-muted-foreground">Queue is empty</p>
+            <div className="flex flex-col items-center justify-center py-12 text-center space-y-2">
+                <CheckCircle2 className="h-8 w-8 text-muted-foreground/30" />
+                <p className="text-xs font-bold text-muted-foreground">Queue is empty</p>
             </div>
         ) : (
             <div className="space-y-3">
                 {queuedItems.map(item => (
-                    <div key={item.id} className="p-3 border rounded-lg bg-gray-50 flex flex-col gap-2">
-                        <div className="flex items-start justify-between gap-2">
+                    <div key={item.id} className="p-4 border border-border rounded-2xl bg-muted/30 flex flex-col gap-2">
+                        <div className="flex items-start justify-between gap-3">
                             <span className="text-xs font-bold line-clamp-1 flex-1 text-foreground">{item.product.title}</span>
-                            <button onClick={() => handleDismissItem(item.id)} className="text-gray-400 hover:text-red-500">
-                                <Trash2 className="h-3 w-3" />
+                            <button onClick={() => handleDismissItem(item.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                                <Trash2 className="h-3.5 w-3.5" />
                             </button>
                         </div>
                         {item.status === 'failed' && (
-                            <p className="text-[10px] text-red-500 font-medium leading-tight">
+                            <p className="text-[10px] text-destructive font-semibold leading-tight">
                                 Error: {item.lastError}
                             </p>
                         )}
                         <div className="flex items-center justify-between mt-1">
-                            <span className="text-[10px] text-gray-400">
-                                {new Date(item.timestamp).toLocaleTimeString()} • {item.attempts} attempts
+                            <span className="text-[10px] text-muted-foreground font-medium">
+                                {new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} • {item.attempts} retries
                             </span>
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                                item.status === 'pending' ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-600'
+                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-lg border uppercase tracking-wider ${
+                                item.status === 'pending'
+                                  ? 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                                  : 'bg-destructive/10 text-destructive border-destructive/20'
                             }`}>
-                                {item.status.toUpperCase()}
+                                {item.status}
                             </span>
                         </div>
                     </div>
@@ -523,14 +533,14 @@ function App() {
             </div>
         )}
       </div>
-      <div className="p-4 border-t bg-gray-50 flex gap-2">
+      <div className="p-4 border-t border-border bg-muted/20 flex gap-2">
         <button
             disabled={isRefreshing || queuedItems.length === 0}
             onClick={handleRetryQueue}
-            className="flex-1 bg-black text-white py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+            className="flex-1 bg-primary text-primary-foreground py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98] transition-all shadow-lg"
         >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Retry All
+            Retry All Queue
         </button>
       </div>
     </div>
@@ -538,63 +548,63 @@ function App() {
 
   if ((state === 'preview' || state === 'saving') && result) {
     const { product, confidence } = result
-    const confidenceColor = confidence > 0.8 ? 'text-green-600' : confidence > 0.5 ? 'text-amber-600' : 'text-red-600'
+    const confidenceColor = confidence > 0.8 ? 'text-green-500' : confidence > 0.5 ? 'text-amber-500' : 'text-destructive'
 
     return (
-      <div className="w-80 flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300 bg-white">
+      <div className="w-80 flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300 bg-background text-foreground">
         <Header />
 
-        <div className="p-4">
-            <div className="aspect-video relative bg-gray-50 rounded-xl overflow-hidden mb-4 border border-gray-100 group">
+        <div className="p-4 space-y-4">
+            <div className="aspect-[4/3] relative bg-muted rounded-2xl overflow-hidden border border-border group shadow-inner">
                 {product.images?.[0] ? (
-                    <img src={product.images[0]} className="w-full h-full object-contain" alt={product.title} />
+                    <img src={product.images[0]} className="w-full h-full object-contain p-2" alt={product.title} />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                        <Plus className="h-8 w-8 text-gray-200" />
+                        <Plus className="h-8 w-8 text-muted-foreground/30" />
                     </div>
                 )}
                 {product.price && (
-                    <div className="absolute bottom-3 right-3 bg-black text-white px-2.5 py-1 rounded-lg text-sm font-bold shadow-lg">
+                    <div className="absolute bottom-3 right-3 bg-neutral-900/90 dark:bg-neutral-50/90 backdrop-blur text-white dark:text-neutral-950 px-3 py-1 rounded-xl text-xs font-black shadow-lg">
                         {product.currency} {product.price}
                     </div>
                 )}
             </div>
 
-            <div className="mb-4">
-                <h1 className="font-bold text-sm line-clamp-2 leading-snug mb-2 text-foreground">{product.title}</h1>
+            <div className="space-y-2">
+                <h1 className="font-black text-sm line-clamp-2 leading-snug text-foreground tracking-tight">{product.title}</h1>
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-gray-500 px-2 py-0.5 bg-gray-100 rounded uppercase tracking-wider">
+                    <span className="text-[9px] font-black text-muted-foreground px-2 py-0.5 bg-muted rounded-lg border border-border uppercase tracking-widest">
                         {product.store || 'Unknown'}
                     </span>
-                    <div className="h-1 w-1 rounded-full bg-gray-300" />
-                    <span className={`text-[10px] font-bold uppercase tracking-wider ${confidenceColor}`}>
+                    <div className="h-1.5 w-1.5 rounded-full bg-border" />
+                    <span className={`text-[10px] font-black uppercase tracking-wider ${confidenceColor}`}>
                         {Math.round(confidence * 100)}% Match
                     </span>
                 </div>
             </div>
 
-            <div className="mb-6">
-                <label className="text-[10px] font-bold uppercase text-gray-400 mb-2 block tracking-widest">Target Wishlist</label>
+            <div>
+                <label className="text-[10px] font-black uppercase text-muted-foreground mb-1.5 block tracking-widest">Target Collection</label>
                 <div className="relative">
                     <select
                         value={selectedWishlistId || ''}
                         onChange={(e) => setSelectedWishlistId(e.target.value)}
-                        className="w-full bg-gray-50 border border-gray-100 rounded-xl py-2.5 px-4 text-sm font-bold appearance-none focus:ring-2 focus:ring-black outline-none cursor-pointer transition-all pr-10 text-foreground"
+                        className="w-full bg-muted border border-border rounded-2xl py-2.5 px-4 text-sm font-bold appearance-none focus:ring-1 focus:ring-foreground outline-none cursor-pointer transition-all pr-10 text-foreground"
                     >
                         {wishlists.map(list => (
                             <option key={list.id} value={list.id}>
-                                {list.name} {list.isDefault ? ' (Default)' : ''}
+                                {list.name} {list.isDefault ? ' (★)' : ''}
                             </option>
                         ))}
                     </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
             </div>
 
             <button
                 onClick={save}
                 disabled={state === 'saving'}
-                className="w-full bg-black text-white py-3.5 rounded-xl font-bold text-sm flex items-center justify-center hover:bg-black/90 disabled:opacity-50 transition-all active:scale-[0.98] shadow-xl shadow-black/10"
+                className="w-full bg-primary text-primary-foreground py-3.5 rounded-2xl font-black text-sm flex items-center justify-center hover:opacity-95 disabled:opacity-50 transition-all active:scale-[0.98] shadow-xl shadow-primary/10"
             >
                 {state === 'saving' ? (
                     <>
