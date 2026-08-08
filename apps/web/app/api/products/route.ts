@@ -24,7 +24,25 @@ export const GET = withApiHandler(async (req, { session }) => {
     return ApiResponse.internalServerError(errMsg);
   }
 
-  return ApiResponse.success({ products: result.value });
+  const mappedProducts = result.value.map((p: any) => {
+    const catalogProduct = p.catalogProduct;
+    if (catalogProduct && catalogProduct.metadata) {
+      const metadata = typeof catalogProduct.metadata === 'string'
+        ? JSON.parse(catalogProduct.metadata)
+        : catalogProduct.metadata;
+      return {
+        ...p,
+        catalogProduct: {
+          ...catalogProduct,
+          price: metadata?.price,
+          currency: metadata?.currency,
+        }
+      };
+    }
+    return p;
+  });
+
+  return ApiResponse.success({ products: mappedProducts });
 });
 
 export const POST = withApiHandler(async (req, { session }) => {

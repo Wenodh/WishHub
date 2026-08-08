@@ -5,14 +5,26 @@ import {
   WishlistProductDto
 } from '@wishhub/wishlist';
 
-export function mapWishlistToDto(wishlist: Wishlist) {
+export function mapWishlistToDto(wishlist: any) {
+  const createdAt = typeof wishlist.createdAt === 'string'
+    ? wishlist.createdAt
+    : wishlist.createdAt instanceof Date
+      ? wishlist.createdAt.toISOString()
+      : String(wishlist.createdAt);
+
+  const updatedAt = typeof wishlist.updatedAt === 'string'
+    ? wishlist.updatedAt
+    : wishlist.updatedAt instanceof Date
+      ? wishlist.updatedAt.toISOString()
+      : String(wishlist.updatedAt);
+
   return {
     id: wishlist.id,
     userId: wishlist.userId,
     name: wishlist.name,
     isDefault: wishlist.isDefault,
-    createdAt: wishlist.createdAt.toISOString(),
-    updatedAt: wishlist.updatedAt.toISOString(),
+    createdAt,
+    updatedAt,
   };
 }
 

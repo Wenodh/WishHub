@@ -42,8 +42,9 @@ export function ProductDetailDrawer({
   isCopied,
   onCopy
 }: ProductDetailDrawerProps) {
-  const { data: insightsData } = useProductInsights(product?.id);
-  const { data: similarData, isLoading: similarLoading } = useProductSimilar(product?.id);
+  const productId = product?.id || product?.savedProductId || null;
+  const { data: insightsData } = useProductInsights(productId);
+  const { data: similarData, isLoading: similarLoading } = useProductSimilar(productId);
   const regenerateMutation = useRegenerateProductInsights();
 
   if (!product) return null;
@@ -96,6 +97,7 @@ export function ProductDetailDrawer({
                   size="icon"
                   onClick={onClose}
                   className="h-9 w-9 rounded-full bg-neutral-100/50 dark:bg-neutral-900/50 text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 transition-all hover:scale-105 active:scale-95"
+                  aria-label="Close panel"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -263,7 +265,7 @@ export function ProductDetailDrawer({
                         variant="outline"
                         size="sm"
                         disabled={regenerateMutation.isPending}
-                        onClick={() => regenerateMutation.mutate(product.id)}
+                        onClick={() => regenerateMutation.mutate(productId)}
                         className="rounded-xl font-bold text-xs gap-2"
                       >
                         <Clock className={cn("h-4 w-4", regenerateMutation.isPending && "animate-spin")} />
@@ -279,7 +281,7 @@ export function ProductDetailDrawer({
                       variant="outline"
                       size="sm"
                       disabled={regenerateMutation.isPending}
-                      onClick={() => regenerateMutation.mutate(product.id)}
+                      onClick={() => regenerateMutation.mutate(productId)}
                       className="mt-3 rounded-xl font-bold text-xs"
                     >
                       {regenerateMutation.isPending ? 'Generating...' : 'Analyze with AI'}
