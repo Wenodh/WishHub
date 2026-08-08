@@ -70,8 +70,8 @@ export class MoveProductService {
           .find(i => i.savedProductId === input.savedProductId);
       if (fromEvents) fromEvents.remove(); // This is a bit hacky because it's already deleted in DB
 
-      // Move event is a special case as it involves two wishlists
-      // We'll just use a placeholder here or rely on the add/remove events
+      // Move event is a special case as it involves two wishlists.
+      // Track the movement between wishlists by dispatching a ProductMovedBetweenWishlists event.
       const _events = [
           ...newItem.pullDomainEvents(),
           new ProductMovedBetweenWishlists(input.fromWishlistId, input.toWishlistId, input.savedProductId)
