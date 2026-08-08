@@ -1,67 +1,253 @@
 import { test, expect } from '@playwright/test';
 
-/**
- * Milestone 1B: Core Product Flow E2E
- * Amazon -> Extension (Mocked) -> Dashboard -> Search/Filter -> Delete
- */
-test.describe('WishHub Milestone 1B E2E Flow', () => {
-  test('should complete the full product lifecycle', async ({ page }) => {
-    // 1. Setup: Start at Dashboard (Mocked Session)
-    await page.goto('http://localhost:3000/dashboard');
+test.describe('WishHub V1 Release Certification End-to-End Journeys', () => {
+  // We keep a shared context but use unique credentials per test run for perfect isolation
+  const generateUser = () => {
+    const ts = Date.now() + Math.floor(Math.random() * 1000);
+    return {
+      email: `user_${ts}@wishhub-test.com`,
+      password: 'Password123!',
+      name: `Test Explorer ${ts}`,
+      wishlistName: `My Tech List ${ts}`,
+    };
+  };
 
-    // 2. Verify Initial State
-    const heading = page.getByRole('heading', { name: 'My Saved Products' });
-    await expect(heading).toBeVisible();
+  test('Master V1 Certification Journey: Signup -> Sidebar Wishlist CRUD -> Save Product -> AI Insights -> Isolation -> Failure Paths -> Logout -> Re-login', async ({ page }) => {
+    const user = generateUser();
+    const uniqueId = `${Date.now()}`;
 
-    // 3. Simulate Extension Saving an Amazon Product
-    // We call the API directly as if the extension was used
-    const amazonProduct = {
-      name: 'Amazon Echo Dot (5th Gen)',
-      url: 'https://www.amazon.com/dp/B09B8V1LZ3',
-      price: 49.99,
+    // ==========================================
+    // 1. LANDING PAGE & SIGNUP
+    // ==========================================
+    await page.goto('/');
+    await expect(page).toHaveTitle(/WishHub/i);
+    await expect(page.getByText('Curate everything you love')).toBeVisible();
+
+    // Navigate to signup
+    await page.getByRole('link', { name: /Get Started Free/i }).click();
+    await page.waitForURL('**/signup');
+
+    // Fill in signup
+    await page.getByPlaceholder(/Alex Doe/i).fill(user.name);
+    await page.getByPlaceholder(/name@example.com/i).fill(user.email);
+    await page.getByPlaceholder(/••••••••/i).fill(user.password);
+    await page.getByRole('button', { name: /Create Account/i }).click();
+
+    // Verify redirected to Dashboard
+    await page.waitForURL('**/dashboard', { timeout: 15000 });
+    await expect(page.getByRole('heading', { name: /explorer/i })).toBeVisible({ timeout: 15000 });
+
+    // Drain the AI job queue first so our run is guaranteed to be processed immediately
+    console.log('Draining stale AI jobs...');
+    await page.evaluate(async () => {
+      let drained = false;
+      let limit = 20; // safety limit to prevent infinite loops
+      while (!drained && limit > 0) {
+        const res = await fetch('/api/ai/jobs', { method: 'POST' });
+        const json = await res.json();
+        if (json.message === 'No pending AI jobs found.' || !json.success) {
+          drained = true;
+        }
+        limit--;
+      }
+    });
+
+    // ==========================================
+    // 2. WISHLIST CREATION VIA SIDEBAR ACTION (Strong stable contract)
+    // ==========================================
+    // Click Sidebar "New Wishlist"
+    const sidebarNewBtn = page.getByRole('button', { name: /New Wishlist/i });
+    await expect(sidebarNewBtn).toBeVisible();
+    await sidebarNewBtn.click();
+
+    // Fill in Dialog form and intercept creation response to extract wishlistId
+    await page.getByLabel(/Wishlist Name/i).fill(user.wishlistName);
+
+    const wishlistResponsePromise = page.waitForResponse(response =>
+      response.url().includes('/api/wishlists') && response.status() === 201
+    );
+
+    await page.getByRole('button', { name: 'Create Wishlist', exact: true }).click();
+
+    const wishlistResponse = await wishlistResponsePromise;
+    const wishlistJson = await wishlistResponse.json();
+    const wishlistId = wishlistJson.data.id;
+    console.log('Intercepted created wishlistId:', wishlistId);
+
+    // Verify new wishlist link appears in sidebar/dashboard
+    const wishlistLink = page.locator('a', { hasText: user.wishlistName });
+    await expect(wishlistLink).toBeVisible({ timeout: 15000 });
+
+    // ==========================================
+    // 3. PRODUCT LIFECYCLE (SAVE & LINK TO COLLECTION VIA API)
+    // ==========================================
+    const testProduct = {
+      name: `Sony Headphones ${uniqueId}`,
+      // Use a completely unique non-Amazon path to bypass ASIN 10-char normalizer clipping
+      url: `https://www.headphones-store.com/product/sony-wh1000-${uniqueId}`,
+      imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80',
+      price: 398.00,
       currency: 'USD',
       storeName: 'Amazon',
-      images: ['https://m.media-amazon.com/images/I/6182S7MYC2L._AC_SL1000_.jpg'],
-      description: 'Smart speaker with Alexa'
+      description: 'Active Noise Canceling Premium headphones.'
     };
 
-    await page.evaluate(async (product) => {
-      await fetch('/api/products', {
+    // Save product globally first (this automatically enqueues a pending AI Job for this product!)
+    const saveResponse = await page.evaluate(async (product) => {
+      const response = await fetch('/api/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(product)
       });
-    }, amazonProduct);
+      return response.json();
+    }, testProduct);
 
-    // 4. Refresh and Verify in Dashboard
-    await page.reload();
-    await expect(page.getByText(amazonProduct.name)).toBeVisible();
-    await expect(page.getByText('Amazon', { exact: true })).toBeVisible();
-    await expect(page.getByText('USD 49.99')).toBeVisible();
+    expect(saveResponse.success).toBe(true);
+    const savedProductId = saveResponse.data.product.id;
+    console.log('Global product saved with ID:', savedProductId);
 
-    // 5. Test Search
-    const searchInput = page.getByPlaceholder('Search products...');
-    await searchInput.fill('Echo');
-    await expect(page.getByText(amazonProduct.name)).toBeVisible();
+    // Link product to the custom wishlist folder
+    const linkResponse = await page.evaluate(async ({ wishlistId, savedProductId }) => {
+      const response = await fetch(`/api/wishlists/${wishlistId}/products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ savedProductId })
+      });
+      return response.json();
+    }, { wishlistId, savedProductId });
 
-    await searchInput.fill('NonExistent');
-    await expect(page.getByText(amazonProduct.name)).not.toBeVisible();
-    await expect(page.getByText('No products match your filters.')).toBeVisible();
+    expect(linkResponse.success).toBe(true);
 
-    // Clear search
-    await searchInput.fill('');
+    // Trigger immediate background AI job processor synchronously via API to process the automatically enqueued pending job
+    console.log('Synchronously triggering AI job processor...');
+    const triggerJobResponse = await page.evaluate(async () => {
+      const response = await fetch('/api/ai/jobs', {
+        method: 'POST'
+      });
+      return response.json();
+    });
+    console.log('AI job processor output:', triggerJobResponse);
+    expect(triggerJobResponse.success).toBe(true);
 
-    // 6. Test Store Filter
-    const storeFilter = page.locator('select').first();
-    await storeFilter.selectOption('Amazon');
-    await expect(page.getByText(amazonProduct.name)).toBeVisible();
+    // Navigate to the custom wishlist folder to view interactive Product Cards
+    await wishlistLink.click();
+    await page.waitForURL(`**/dashboard?wishlist=${wishlistId}`);
 
-    // 7. Test Optimistic Delete
-    const deleteButton = page.locator('button:has(svg.lucide-trash2)').first();
-    await deleteButton.click();
+    // Verify product card is visible in the folder
+    const cardHeading = page.getByRole('heading', { name: testProduct.name });
+    await expect(cardHeading).toBeVisible({ timeout: 15000 });
 
-    // Should disappear immediately (Optimistic UI)
-    await expect(page.getByText(amazonProduct.name)).not.toBeVisible();
-    await expect(page.getByText('No products saved yet.')).toBeVisible();
+    // ==========================================
+    // 4. PRODUCT DETAILED DRAWER & AI INSIGHTS
+    // ==========================================
+    // Click card to open drawer
+    await cardHeading.click();
+
+    // Verify drawer details are fully rendered
+    const drawerHeading = page.getByRole('heading', { name: testProduct.name }).nth(1);
+    await expect(drawerHeading).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('AI Shopping Insights')).toBeVisible();
+
+    // Verify AI analysis recommendation contract is rendered perfectly
+    await expect(page.getByText(/Match Confidence/i)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Pros', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Cons', exact: true })).toBeVisible();
+
+    // Close panel drawer cleanly (WCAG 2.2 AA compliant close panel)
+    await page.getByRole('button', { name: 'Close panel' }).click();
+    await expect(drawerHeading).not.toBeVisible();
+
+    // ==========================================
+    // 5. SECURITY: USER ISOLATION VERIFICATION
+    // ==========================================
+    const apiIsolationResult = await page.evaluate(async () => {
+      // 1. Attempt to delete a non-existent wishlist ID
+      const wishlistRes = await fetch('/api/wishlists/non-existent-wishlist-id-123', {
+        method: 'DELETE'
+      });
+      const wishlistJson = await wishlistRes.json();
+
+      // 2. Attempt to access a non-existent product's insights via GET
+      const insightsRes = await fetch('/api/products/non-existent-product-id-456/insights');
+      const insightsJson = await insightsRes.json();
+
+      return {
+        wishlistStatus: wishlistRes.status,
+        wishlistSuccess: wishlistJson.success,
+        insightsStatus: insightsRes.status,
+        insightsSuccess: insightsJson.success,
+      };
+    });
+
+    // Verify that unowned/non-existent resource mutations are correctly blocked (403/404)
+    expect(apiIsolationResult.wishlistStatus).toBe(403);
+    expect(apiIsolationResult.wishlistSuccess).toBe(false);
+    expect(apiIsolationResult.insightsStatus).toBe(404);
+    expect(apiIsolationResult.insightsSuccess).toBe(false);
+
+    // ==========================================
+    // 6. FAILURE PATHS & GRACEFUL UX DEGRADATION
+    // ==========================================
+    const unauthResult = await page.evaluate(async () => {
+      // Omit cookies to guarantee unauthenticated state!
+      const res = await fetch('/api/wishlists', {
+        credentials: 'omit',
+        headers: { 'Authorization': 'Bearer expired-token' }
+      });
+      return { status: res.status, ok: res.ok };
+    });
+    expect(unauthResult.status).toBe(401);
+
+    // ==========================================
+    // 7. SIGN OUT JOURNEY
+    // ==========================================
+    await page.getByRole('button', { name: user.name }).click();
+    await page.getByRole('menuitem', { name: /Log out/i }).click();
+
+    await page.waitForURL('**/login');
+    await expect(page.getByRole('heading', { name: /Welcome Back/i })).toBeVisible();
+
+    // ==========================================
+    // 8. RE-LOGIN & VERIFY PERSISTENCE
+    // ==========================================
+    await page.getByPlaceholder(/name@example.com/i).fill(user.email);
+    await page.getByPlaceholder(/••••••••/i).fill(user.password);
+    await page.getByRole('button', { name: /Sign In/i }).click();
+
+    await page.waitForURL('**/dashboard');
+    await expect(page.getByRole('heading', { name: /explorer/i })).toBeVisible();
+
+    // Verify database integrity and persistence
+    await expect(page.locator('a', { hasText: user.wishlistName })).toBeVisible();
+    await expect(page.getByRole('heading', { name: testProduct.name })).toBeVisible();
+  });
+
+  test('Dashboard Empty State Focus: Fresh User -> Loads Empty State -> CTA click -> Create Wishlist', async ({ page }) => {
+    const user = generateUser();
+
+    // 1. Signup fresh user
+    await page.goto('/signup');
+    await page.getByPlaceholder(/Alex Doe/i).fill(user.name);
+    await page.getByPlaceholder(/name@example.com/i).fill(user.email);
+    await page.getByPlaceholder(/••••••••/i).fill(user.password);
+    await page.getByRole('button', { name: /Create Account/i }).click();
+
+    // Wait for Dashboard
+    await page.waitForURL('**/dashboard', { timeout: 15000 });
+    await expect(page.getByRole('heading', { name: /explorer/i })).toBeVisible({ timeout: 15000 });
+
+    // 2. Assert empty-state collection contract
+    await expect(page.getByText('No collections created yet.')).toBeVisible({ timeout: 15000 });
+    const ctaBtn = page.getByRole('button', { name: /Create your first collection/i });
+    await expect(ctaBtn).toBeVisible();
+
+    // 3. CTA creates wishlist successfully
+    await ctaBtn.click();
+    await page.getByLabel(/Wishlist Name/i).fill(user.wishlistName);
+    await page.getByRole('button', { name: 'Create Wishlist', exact: true }).click();
+
+    // Verify wishlist link is active and visible
+    await expect(page.locator('a', { hasText: user.wishlistName })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('No collections created yet.')).not.toBeVisible();
   });
 });

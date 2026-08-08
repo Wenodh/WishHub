@@ -55,6 +55,11 @@ export class ListWishlistProductsService {
       const savedProduct = savedProducts.find(p => p.id === item.savedProductId);
       const catalogProduct = savedProduct ? catalogProducts.find(cp => cp.id === savedProduct.catalogProductId) : null;
 
+      const firstImage = catalogProduct?.images[0];
+      const imageUrl = typeof firstImage === 'string'
+        ? firstImage
+        : (firstImage as any)?.url ?? '';
+
       return {
         savedProductId: item.savedProductId,
         catalogProductId: catalogProduct?.id ?? '',
@@ -63,7 +68,7 @@ export class ListWishlistProductsService {
         store: catalogProduct?.store ?? 'Unknown Store',
         price: (catalogProduct?.metadata as any)?.price,
         currency: (catalogProduct?.metadata as any)?.currency,
-        imageUrl: catalogProduct?.images[0],
+        imageUrl,
         addedAt: item.createdAt.toISOString(),
       };
     });
