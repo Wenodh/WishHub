@@ -280,6 +280,9 @@ importers:
       framer-motion:
         specifier: 11.18.2
         version: 11.18.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      jsdom:
+        specifier: ^29.1.1
+        version: 29.1.1(@noble/hashes@2.2.0)
       lucide-react:
         specifier: ^0.460.0
         version: 0.460.0(react@19.0.0)
@@ -341,9 +344,6 @@ importers:
       eslint:
         specifier: ^9.15.0
         version: 9.39.1(jiti@1.21.7)
-      jsdom:
-        specifier: ^29.1.1
-        version: 29.1.1(@noble/hashes@2.2.0)
       postcss:
         specifier: '>=8.5.10'
         version: 8.5.16

@@ -8,7 +8,7 @@
     "./eslint/next-js": "./eslint/next.js",
     "./eslint/react-internal": "./eslint/react-internal.js",
     "./prettier": "./prettier/index.json",
-    "./tailwind": "./tailwind/index.js",
+    "./tailwind": "./tailwind/index.cjs",
     "./typescript/base": "./typescript/base.json",
     "./typescript/nextjs": "./typescript/nextjs.json",
     "./typescript/react-library": "./typescript/react-library.json"
