@@ -7,10 +7,11 @@ import { Toolbar } from '@/components/dashboard/toolbar/toolbar';
 import { ProductGrid } from '@/components/dashboard/product/product-grid';
 import { DashboardHome } from '@/components/dashboard/dashboard-home';
 import { Button } from '@wishhub/ui';
-import { Settings2, Star } from 'lucide-react';
+import { Settings2, Star, Plus } from 'lucide-react';
 import { useState, Suspense, useCallback } from 'react';
 import { WishlistSettingsDialog } from '@/components/dashboard/dialogs/wishlist-settings-dialog';
 import { CreateWishlistDialog } from '@/components/dashboard/dialogs/create-wishlist-dialog';
+import { AddProductDialog } from '@/components/dashboard/dialogs/add-product-dialog';
 
 function DashboardContent() {
   const router = useRouter();
@@ -22,6 +23,7 @@ function DashboardContent() {
   const { data: wishlists } = useWishlists();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
 
   const activeWishlist = wishlists?.find(w => w.id === activeWishlistId);
 
@@ -43,6 +45,7 @@ function DashboardContent() {
         <DashboardHome
           onSelectWishlist={handleSelectWishlist}
           onOpenCreateDialog={() => setCreateOpen(true)}
+          onOpenAddProductDialog={() => setAddOpen(true)}
         />
       ) : (
         <div className="space-y-8">
@@ -64,11 +67,19 @@ function DashboardContent() {
             </div>
 
             <div className="flex items-center gap-3">
+                <Button
+                  size="sm"
+                  className="rounded-2xl gap-2 shadow-sm px-4 h-11 hover:scale-[1.02] active:scale-[0.98] transition-all bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-bold"
+                  onClick={() => setAddOpen(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Product
+                </Button>
                 {activeWishlist && (
                     <Button
                       variant="outline"
                       size="sm"
-                      className="rounded-2xl gap-2 border-neutral-200 dark:border-neutral-800 shadow-sm px-4 h-11 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                      className="rounded-2xl gap-2 border-neutral-200 dark:border-neutral-800 shadow-sm px-4 h-11 hover:scale-[1.02] active:scale-[0.98] transition-all font-bold"
                       onClick={() => setSettingsOpen(true)}
                     >
                       <Settings2 className="h-4 w-4 text-neutral-500" />
@@ -95,6 +106,12 @@ function DashboardContent() {
       <CreateWishlistDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
+      />
+
+      <AddProductDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        defaultWishlistId={activeWishlistId}
       />
     </div>
   );
