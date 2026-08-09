@@ -38,9 +38,10 @@ import { cn } from '@wishhub/utils';
 interface DashboardHomeProps {
   onSelectWishlist: (id: string) => void;
   onOpenCreateDialog: () => void;
+  onOpenAddProductDialog: () => void;
 }
 
-export function DashboardHome({ onSelectWishlist, onOpenCreateDialog }: DashboardHomeProps) {
+export function DashboardHome({ onSelectWishlist, onOpenCreateDialog, onOpenAddProductDialog }: DashboardHomeProps) {
   const { data: productsData, isLoading: productsLoading } = useProducts();
   const { data: wishlists, isLoading: wishlistsLoading } = useWishlists();
 
@@ -123,8 +124,16 @@ export function DashboardHome({ onSelectWishlist, onOpenCreateDialog }: Dashboar
         {/* Quick Command Action Triggers */}
         <div className="flex flex-wrap items-center gap-3">
           <Button
+            onClick={onOpenAddProductDialog}
+            className="rounded-2xl shadow-lg shadow-neutral-950/10 dark:shadow-neutral-500/5 hover:scale-[1.02] transition-transform flex items-center gap-2 bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-bold"
+          >
+            <Plus className="h-4 w-4" />
+            Add Product
+          </Button>
+          <Button
             onClick={onOpenCreateDialog}
-            className="rounded-2xl shadow-lg shadow-neutral-950/10 dark:shadow-neutral-500/5 hover:scale-[1.02] transition-transform flex items-center gap-2"
+            className="rounded-2xl shadow-lg shadow-neutral-950/10 dark:shadow-neutral-500/5 hover:scale-[1.02] transition-transform flex items-center gap-2 font-bold"
+            variant="outline"
           >
             <Plus className="h-4 w-4" />
             New Collection

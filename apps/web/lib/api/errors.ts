@@ -5,24 +5,24 @@ export function mapDomainError(error: DomainError) {
   const code = error.code || 'DOMAIN_ERROR';
   const message = error.message;
 
-  switch (error.constructor.name) {
-    case 'WishlistNotFoundError':
-    case 'SavedProductNotFoundError':
+  switch (code) {
+    case 'WISHLIST_NOT_FOUND':
+    case 'SAVED_PRODUCT_NOT_FOUND':
       return ApiResponse.notFound(message);
 
-    case 'DuplicateWishlistNameError':
-    case 'DuplicateWishlistItemError':
+    case 'DUPLICATE_WISHLIST_NAME':
+    case 'DUPLICATE_WISHLIST_ITEM':
       return ApiResponse.conflict(message, code);
 
-    case 'WishlistLimitExceededError':
+    case 'WISHLIST_LIMIT_EXCEEDED':
       return ApiResponse.unprocessable(message, code);
 
-    case 'UnauthorizedWishlistAccessError':
+    case 'UNAUTHORIZED_WISHLIST_ACCESS':
       return ApiResponse.forbidden(message);
 
-    case 'InvalidWishlistNameError':
-    case 'CannotDeleteOnlyWishlistError':
-    case 'CannotDeleteDefaultWishlistError':
+    case 'INVALID_WISHLIST_NAME':
+    case 'CANNOT_DELETE_ONLY_WISHLIST':
+    case 'CANNOT_DELETE_DEFAULT_WISHLIST':
       return ApiResponse.badRequest(message, code);
 
     default:
