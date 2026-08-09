@@ -17,7 +17,8 @@ import {
   Move,
   Trash2,
   Copy,
-  Check
+  Check,
+  Pencil
 } from 'lucide-react';
 import { Button, Badge, Avatar, Skeleton } from '@wishhub/ui';
 import { useProductInsights, useProductSimilar, useRegenerateProductInsights } from '@wishhub/api-client';
@@ -29,6 +30,7 @@ interface ProductDetailDrawerProps {
   product: any;
   onMove: () => void;
   onDelete: () => void;
+  onEdit: () => void;
   isCopied: boolean;
   onCopy: () => void;
 }
@@ -39,6 +41,7 @@ export function ProductDetailDrawer({
   product,
   onMove,
   onDelete,
+  onEdit,
   isCopied,
   onCopy
 }: ProductDetailDrawerProps) {
@@ -150,6 +153,15 @@ export function ProductDetailDrawer({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <Button
                   variant="outline"
+                  onClick={onEdit}
+                  className="rounded-2xl gap-2 h-11 border-neutral-200 dark:border-neutral-800 transition-all active:scale-95 text-xs font-bold"
+                >
+                  <Pencil className="h-4 w-4" />
+                  Edit
+                </Button>
+
+                <Button
+                  variant="outline"
                   onClick={onCopy}
                   className="rounded-2xl gap-2 h-11 border-neutral-200 dark:border-neutral-800 transition-all active:scale-95 text-xs font-bold"
                 >
@@ -178,11 +190,11 @@ export function ProductDetailDrawer({
                 <Button
                   variant="default"
                   asChild
-                  className="rounded-2xl gap-2 h-11 transition-all active:scale-95 text-xs font-bold col-span-2 sm:col-span-2"
+                  className="rounded-2xl gap-2 h-11 transition-all active:scale-95 text-xs font-bold"
                 >
                   <a href={url} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="h-4 w-4" />
-                    Visit Official Site
+                    Visit
                   </a>
                 </Button>
               </div>

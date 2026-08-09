@@ -30,6 +30,7 @@ import { cn } from '@wishhub/utils';
 import { useDeleteProduct, useRemoveProductFromWishlist } from '@wishhub/api-client';
 import { useSearchParams } from 'next/navigation';
 import { MoveProductDialog } from '../dialogs/move-product-dialog';
+import { EditProductDialog } from '../dialogs/edit-product-dialog';
 import { ProductDetailDrawer } from './product-detail-drawer';
 import { motion } from 'framer-motion';
 
@@ -41,6 +42,7 @@ interface ProductCardProps {
 export function ProductCard({ product, view }: ProductCardProps) {
   const [isCopied, setIsCopied] = useState(false);
   const [moveOpen, setMoveOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const searchParams = useSearchParams();
   const activeWishlistId = searchParams.get('wishlist');
@@ -154,6 +156,13 @@ export function ProductCard({ product, view }: ProductCardProps) {
             product={product}
         />
 
+        {/* Editing product dialog */}
+        <EditProductDialog
+            open={editOpen}
+            onOpenChange={setEditOpen}
+            product={product}
+        />
+
         {/* Visual detailed right side slideover */}
         <ProductDetailDrawer
           isOpen={detailOpen}
@@ -161,6 +170,7 @@ export function ProductCard({ product, view }: ProductCardProps) {
           product={product}
           onMove={() => setMoveOpen(true)}
           onDelete={handleRemove}
+          onEdit={() => setEditOpen(true)}
           isCopied={isCopied}
           onCopy={handleCopy}
         />
@@ -273,6 +283,13 @@ export function ProductCard({ product, view }: ProductCardProps) {
           product={product}
       />
 
+      {/* Editing product dialog */}
+      <EditProductDialog
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          product={product}
+      />
+
       {/* Slide detail visual drawer panel */}
       <ProductDetailDrawer
         isOpen={detailOpen}
@@ -280,6 +297,7 @@ export function ProductCard({ product, view }: ProductCardProps) {
         product={product}
         onMove={() => setMoveOpen(true)}
         onDelete={handleRemove}
+        onEdit={() => setEditOpen(true)}
         isCopied={isCopied}
         onCopy={handleCopy}
       />
