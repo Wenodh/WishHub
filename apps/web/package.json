@@ -20,6 +20,7 @@
     "@wishhub/contracts": "workspace:*",
     "@wishhub/database": "workspace:*",
     "@wishhub/env": "workspace:*",
+    "@wishhub/scraper": "workspace:*",
     "@wishhub/sdk": "workspace:*",
     "@wishhub/types": "workspace:*",
     "@wishhub/ui": "workspace:*",
