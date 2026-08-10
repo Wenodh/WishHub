@@ -98,7 +98,7 @@ describe('Products [id] Endpoints', () => {
     it('should delete product successfully', async () => {
       const session = { user: { id: 'user-1' } };
       vi.mocked(auth.api.getSession).mockResolvedValue(session as any);
-      vi.mocked(deleteProductService.execute).mockResolvedValue({ ok: true, value: null });
+      vi.mocked(deleteProductService.execute).mockResolvedValue({ ok: true, value: true });
 
       const req = new Request('http://localhost/api/products/prod-1', { method: 'DELETE' });
       const res = await DELETE(req as any, { params: Promise.resolve({ id: 'prod-1' }) } as any);
