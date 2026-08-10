@@ -40,17 +40,21 @@ A full user lifecycle from guest to signed-up power user was simulated and verif
    - User navigates to the custom wishlist folder, clicks on the interactive `ProductCard`, and slides open the `ProductDetailDrawer`.
 7. **AI Insights & Recommendations**:
    - Drawer displays "AI Shopping Insights" including match confidence score (e.g., 90%), reasoning, pros, and cons.
-   - Close drawer using WCAG 2.2 AA compliant close button.
-8. **User Isolation & Security**:
+8. **Product Editing Lifecycle (P0)**:
+   - User clicks the Pencil/Edit details button inside the drawer, which triggers the premium `EditProductDialog` modal with auto-populated title, price, currency, merchant, and description.
+   - User edits title, price, store name, or image and saves. Submits PATCH request to `/api/products/[id]` endpoint, validating ownership.
+   - Dialog closes, product state is invalidated via React Query, and visual drawer immediately renders updated details.
+9. **User Isolation & Security**:
+   - Active user attempts to update/PATCH a non-owned saved product, returning `403 Forbidden`.
    - Active user attempts to delete a non-existent wishlist ID via `DELETE /api/wishlists/[id]`, which returns `403 Forbidden` (protecting existence mapping).
    - Active user attempts to fetch a non-existent product's insights via `GET /api/products/[id]/insights`, returning `404 Not Found`.
-9. **Failure Paths & Session Expiration**:
+10. **Failure Paths & Session Expiration**:
    - Triggers `fetch` with `credentials: 'omit'` to simulate expired session/cookie absence. returns standard `401 Unauthorized` response.
-10. **Sign Out**:
+11. **Sign Out**:
     - Click user dropdown menu and trigger log out. Redirects instantly to `/login`.
-11. **Re-login & Data Persistence**:
+12. **Re-login & Data Persistence**:
     - Signs back in with previous unique credentials.
-    - Verifies that both the custom wishlist folder and the saved product persisted correctly.
+    - Verifies that both the custom wishlist folder and the saved, edited product details persisted correctly in the database.
 
 ---
 

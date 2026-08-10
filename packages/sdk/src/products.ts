@@ -33,4 +33,15 @@ export class ProductSDK {
     const json = await res.json();
     return json.success && json.data !== undefined ? json.data : json;
   }
+
+  async update(id: string, data: any) {
+    const res = await fetch(`${this.baseUrl}/api/products/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error('Failed to update product');
+    const json = await res.json();
+    return json.success && json.data !== undefined ? json.data : json;
+  }
 }

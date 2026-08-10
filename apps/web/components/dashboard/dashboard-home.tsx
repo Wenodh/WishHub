@@ -150,9 +150,8 @@ export function DashboardHome({ onSelectWishlist, onOpenCreateDialog, onOpenAddP
             <div className="p-2.5 rounded-2xl bg-neutral-100 dark:bg-neutral-900 text-neutral-500 dark:text-neutral-400">
               <Layers className="h-5 w-5" />
             </div>
-            <span className="text-xs font-bold text-green-500 flex items-center gap-0.5 bg-green-500/5 dark:bg-green-500/10 px-2.5 py-1 rounded-full">
-              <TrendingUp className="h-3.5 w-3.5" />
-              +12%
+            <span className="text-xs font-bold text-neutral-500 bg-neutral-100 dark:bg-neutral-900 px-2.5 py-1 rounded-full">
+              Items
             </span>
           </div>
           <h4 className="text-3xl font-black tracking-tight text-neutral-900 dark:text-neutral-100">

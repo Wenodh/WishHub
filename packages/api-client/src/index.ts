@@ -53,6 +53,19 @@ export const useDeleteProduct = () => {
   });
 };
 
+export const useUpdateProduct = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }: { id: string; title?: string; price?: number; currency?: string; store?: string; description?: string; imageUrl?: string }) =>
+      sdk.products.update(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['wishlists'] });
+      queryClient.invalidateQueries({ queryKey: ['products', variables.id, 'insights'] });
+    },
+  });
+};
+
 // Wishlists
 export const useWishlists = () => {
     return useQuery({
