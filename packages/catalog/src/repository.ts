@@ -1,6 +1,15 @@
 import { prisma } from '@wishhub/database';
 
 export class ProductRepository {
+  async findById(id: string) {
+    return prisma.savedProduct.findUnique({
+      where: { id },
+      include: {
+        catalogProduct: true
+      }
+    });
+  }
+
   async findByUserIdAndCatalogId(userId: string, catalogProductId: string) {
     return prisma.savedProduct.findUnique({
       where: {

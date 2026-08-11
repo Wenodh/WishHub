@@ -6,8 +6,8 @@ export class DeleteProductService {
   async execute(userId: string, productId: string): Promise<Result<boolean, string>> {
     const start = performance.now();
     try {
-      // Check ownership
-      const product = await productRepository.findByUserIdAndCatalogId(userId, productId);
+      // Check ownership using the primary key SavedProduct.id
+      const product = await productRepository.findById(productId);
       if (!product || product.userId !== userId) {
         return err('Product not found or unauthorized');
       }

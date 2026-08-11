@@ -288,7 +288,9 @@ export function ProductDetailDrawer({
                 ) : (
                   <div className="p-6 text-center rounded-3xl border border-dashed border-neutral-200 dark:border-neutral-800 bg-neutral-50/20 dark:bg-neutral-900/5">
                     <Sparkles className="h-5 w-5 text-neutral-400 mx-auto mb-2" />
-                    <p className="text-xs text-neutral-500 font-medium">No AI Insights generated yet.</p>
+                    <p className="text-xs text-neutral-500 font-medium">
+                      {insightsData?.status === 'failed' ? 'AI Analysis failed to generate details.' : 'No AI Insights generated yet.'}
+                    </p>
                     <Button
                       variant="outline"
                       size="sm"
