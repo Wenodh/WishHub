@@ -22,7 +22,7 @@ graph TD
 ```
 
 ### Proposed Improvement: Migrate from db push to formal Prisma migrations
-- **Why it matters**: Pushing schema changes directly to production databases (e.g. Supabase) without generating and verifying migration scripts presents significant data loss risks.
+- **Why it matters**: Pushing schema changes directly to production databases (e.g. Neon) without generating and verifying migration scripts presents significant data loss risks.
 - **Current Implementation**: Schema changes are pushed directly using `prisma db push`.
 - **Proposed Improvement**: Generate formal migration script files (`prisma migrate dev`) during local development and run these migrations as a step in the deployment pipeline.
 - **Impact**: Provides a history of schema changes and guarantees safe, reproducible database deployments.

@@ -1,7 +1,7 @@
 # Database Schema & Architecture
 
 ## Overview
-WishHub uses Prisma with a PostgreSQL (Supabase) backend. The schema is designed to separate global product data from user-specific interactions.
+WishHub uses Prisma with a PostgreSQL (Neon in production, PostgreSQL local) backend. The schema is designed to separate global product data from user-specific interactions.
 
 ## Entity Relationship Diagram
 ```mermaid

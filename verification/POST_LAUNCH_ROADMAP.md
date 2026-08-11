@@ -17,5 +17,5 @@ Following our successful Version 1.0 Release, Version 1.1 will shift our core pr
 ---
 
 ## 3. Long-Term Architecture (3-Year Vision)
-- **Vector Search Similarity**: Incorporate OpenAI embeddings (`EmbeddingSimilarityStrategy`) and pgvector inside Supabase to suggest highly accurate similar products and alternate merchants automatically.
+- **Vector Search Similarity**: Incorporate OpenAI embeddings (`EmbeddingSimilarityStrategy`) and pgvector inside Neon to suggest highly accurate similar products and alternate merchants automatically.
 - **Universal Mobile Apps**: Launch our React Native / Expo Universal mobile app (`apps/mobile`) to App Store and Google Play platforms.

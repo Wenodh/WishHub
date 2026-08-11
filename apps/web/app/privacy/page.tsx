@@ -59,7 +59,7 @@ export default function PrivacyPage() {
           <section className="space-y-3">
             <h2 className="text-lg font-extrabold text-neutral-950 dark:text-white">4. Data Sharing and Protection</h2>
             <p>
-              We stand firmly behind a <strong>no-sale policy</strong>. We never trade, rent, or lease your private wishlists or personal demographics with advertising networks or third-party data aggregators. All databases are securely hosted in Supabase with SSL/HTTPS encryption standards enforced.
+              We stand firmly behind a <strong>no-sale policy</strong>. We never trade, rent, or lease your private wishlists or personal demographics with advertising networks or third-party data aggregators. All databases are securely hosted on PostgreSQL databases with SSL/HTTPS encryption standards enforced.
             </p>
           </section>
 
