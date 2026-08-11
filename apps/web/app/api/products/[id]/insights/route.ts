@@ -36,7 +36,7 @@ export const GET = withApiHandler(async (req, { params, session }) => {
 
   if (!insight) {
     return ApiResponse.success({
-      status: jobStatus === 'PROCESSING' ? 'generating' : 'pending',
+      status: jobStatus === 'PROCESSING' ? 'generating' : jobStatus === 'FAILED' ? 'failed' : 'pending',
       insight: null,
       tags: []
     });
