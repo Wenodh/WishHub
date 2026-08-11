@@ -15,7 +15,7 @@ The fundamental user journey must work reliably:
 ```text
 User
  ↓
-Authenticate (Supabase Auth)
+Authenticate (Better Auth)
  ↓
 Create/select wishlist
  ↓
@@ -103,7 +103,7 @@ Agents must not work on lower-priority tiers while higher tiers contain known br
 
 ```text
 P0 — Core Wishlist
-    Authentication (Supabase Auth)
+    Authentication (Better Auth)
     Wishlists (CRUD, Default list)
     Add product (URL & Manual override)
     View products
@@ -174,7 +174,7 @@ Avoid duplicate models and parallel abstractions.
 
 For V1, authentication must remain simple and unified.
 
-**Supabase Auth is the authoritative authentication platform.**
+**Better Auth is the authoritative authentication platform.**
 
 Minimum requirements:
 - signup
@@ -186,7 +186,12 @@ Minimum requirements:
 - user ownership checks
 - user isolation
 
-Never build a custom authentication system when Supabase Auth already provides the required functionality. If legacy authentication configurations (such as Better Auth) exist in the repository, prioritize migrating them completely to Supabase Auth to avoid dual auth layers running in parallel.
+Never build a custom authentication system or introduce duplicate authentication setups when Better Auth already provides the required functionality. Ensure there is no active Supabase Auth layer running in parallel.
+
+The following environment variables are required for a functioning authentication deployment:
+- `BETTER_AUTH_SECRET`
+- `BETTER_AUTH_URL`
+- `DATABASE_URL`
 
 Agents must never commit secrets. Environment variables belong in environment configuration, never source code.
 
@@ -249,7 +254,7 @@ Never make the entire save operation fail simply because optional metadata extra
 
 ## 7. DATABASE RULES & WORKFLOW
 
-PostgreSQL hosted on Supabase is the persistence layer. Prisma is used for application database access.
+PostgreSQL hosted on Neon is the persistence layer. Prisma is used for application database access.
 
 ### Database Workflow Protocol
 - **Development**: Use schema push (`pnpm db:push` / `prisma db push`) inside packages/database during local iterations. There is no `prisma/migrations` folder; schema push is our active development workflow.
@@ -465,7 +470,7 @@ are appropriately covered.
 Ultimately, V1 is complete when a real user can independently:
 **Create an account → create a wishlist → paste any product URL → save it → see it in the wishlist → manage it → log out → log back in → still see the data.**
 
-That journey must work against the real Supabase database.
+That journey must work against the real Neon PostgreSQL database.
 
 ---
 
@@ -509,7 +514,7 @@ When no explicit task is provided, agents should prioritize the following order:
 
 ```text
 1. Broken core functionality
-2. Authentication / authorization (Supabase Auth Migration)
+2. Authentication / authorization (Better Auth Setup)
 3. Add-to-wishlist flow (with manual form override)
 4. Wishlist CRUD
 5. Product CRUD
@@ -531,7 +536,7 @@ When no explicit task is provided, agents should prioritize the following order:
 Document the future roadmap but do not implement it unless explicitly requested:
 
 ```text
-V1: Universal Wishlist (Core, Manual Form, Supabase Auth)
+V1: Universal Wishlist (Core, Manual Form, Better Auth)
   │
   └── V1.1: AI Shopping Intelligence (On-demand insights, strict guardrails)
         │
