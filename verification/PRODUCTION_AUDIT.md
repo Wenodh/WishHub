@@ -1,63 +1,65 @@
 # Production Audit Report
 
-## 1. Executive Summary & Current State
-WishHub has successfully entered the final Production Excellence phase (Milestone 4). The primary goal is to ensure the product operates at an enterprise-ready, premium consumer SaaS level (comparable to Apple, Linear, and Vercel) across all visual and architectural touchpoints.
+## 1. Environment Variables Audit & Classification
 
-The Next.js 16 production build compiles perfectly via the Turbopack compiler, producing highly optimized static and dynamic pages. The application successfully integrates with Better Auth, Prisma ORM, and a native local PostgreSQL 16 database.
+A complete audit of environment variables configured across the WishHub repository:
 
-During our local production smoke tests, 100% of P0 core features (authentication, wishlist CRUD, product CRUD, metadata extraction, user isolation, and security sanitization) passed flawlessly under automated Playwright E2E simulation.
+### Category A: Required Production
+- `DATABASE_URL`: Connection string to Neon PostgreSQL with connection pooling.
+- `DIRECT_URL`: Non-pooling direct connection string used by Prisma during migrations.
+- `BETTER_AUTH_SECRET`: Mandatory cryptographic signature key for session validation. Must be at least 32 characters.
+- `BETTER_AUTH_URL`: Canonical base URL of the active web application (e.g., `https://wishhub.com`).
+- `NEXT_PUBLIC_APP_URL`: Canonical base URL utilized on client components.
 
----
+### Category B: Required Development/Test
+- `DATABASE_URL`: Local PostgreSQL connection string (`postgresql://postgres:postgres@localhost:5432/postgres`).
+- `BETTER_AUTH_SECRET`: Development signing salt (e.g., `testsecretbetterauth1234567890`).
+- `BETTER_AUTH_URL`: Local testing host (`http://localhost:3000`).
+- `NEXT_PUBLIC_APP_URL`: Local client base URL (`http://localhost:3000`).
 
-## 2. Issues Discovered & Root Causes
+### Category C: Optional Capabilities
+- `FEATURE_AI`: Determines whether synchronous AI Shopping Insights is enabled (`true`/`false`).
+- `FEATURE_PRICE_TRACKING`: Toggles price snapshot engines (`true`/`false`).
+- `FEATURE_NOTIFICATIONS`: Toggles push/alert integrations (`true`/`false`).
+- `FEATURE_PUBLIC_WISHLISTS`: Enables sharable wishlist folders (`true`/`false`).
+- `RESEND_API_KEY`: Key for email transactions.
+- `STORAGE_BUCKET`: Storage bucket identifier.
+- `FCM_PROJECT_ID`: Firebase project identifier.
 
-### Issue 1: Broken Linter Environment (TypeError: Cannot set properties of undefined)
-- **Finding**: Running `pnpm lint` or building the application failed on packages with ESLint configs due to an Ajv version mismatch.
-- **Root Cause**: The pnpm overrides section in `package.json` had `"ajv@<6.14.0": ">=6.14.0"`. This forced all dependencies requiring old Ajv v6 (like `@eslint/eslintrc`) to resolve to Ajv v8.20.0, which broke internals that expect Ajv v6 features (`ajv._opts`).
-- **Fix**: Restructured the root `package.json` pnpm overrides to `"ajv@<6.14.0": "^6.14.0"`. This allows Ajv v6 to be correctly resolved for packages needing v6 (resolves to `6.15.0`) while modern packages resolve to v8.
-- **Result**: `pnpm lint` passes cleanly across all 26 monorepo workspaces.
-
-### Issue 2: JSDOM TypeScript Declaration Missing in App Route
-- **Finding**: Production build failed on the server because `jsdom` typings could not be found under the Next.js Turbopack compiler.
-- **Root Cause**: `jsdom` was tracked under `devDependencies` in `apps/web/package.json`, causing Next.js Turbopack to fail when generating production builds on platforms like Vercel.
-- **Fix**: Moved `jsdom` from `devDependencies` to production `dependencies` in `apps/web/package.json` so that the compiler correctly bundles it at compile and runtime. Verified that `@types/jsdom` is properly tracked.
-- **Result**: Production builds compile and bundle with 100% efficiency.
-
-### Issue 3: TypeScript Typecheck Error in `route.spec.ts`
-- **Finding**: Web workspace typecheck command (`tsc --noEmit`) threw an error on `route.spec.ts:101`.
-- **Root Cause**: `vi.mocked(deleteProductService.execute).mockResolvedValue({ ok: true, value: null });` did not match the defined Result type constraint `Result<boolean, string>`, which expects the `value` field to be of type `boolean`.
-- **Fix**: Corrected the resolved mock return payload to `{ ok: true, value: true }`.
-- **Result**: `pnpm typecheck` compiles cleanly across all packages with zero compilation errors.
-
-### Issue 4: Database Session Table Mismatches
-- **Finding**: Running user signup with Better Auth threw unhandled relational execution crashes.
-- **Root Cause**: Missing table definitions in `packages/database/prisma/schema.prisma` required by Better Auth's standard adapter.
-- **Fix**: Verified and updated the schema to include `User`, `Session`, `Account`, and `Verification` with proper foreign key cascades.
-- **Result**: Database syncs seamlessly and persists session cookies flawlessly.
+### Category D: Obsolete Variables
+- `NEXT_PUBLIC_SUPABASE_URL`: Unused. Supabase Auth is deprecated.
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Unused. Supabase Auth is deprecated.
+- `SUPABASE_SERVICE_ROLE_KEY`: Unused. Supabase Auth is deprecated.
 
 ---
 
-## 3. Production Readiness Comparison
+## 2. Build Warnings Classification & Resolution
 
-| Criteria | Before | After | Status |
-| :--- | :--- | :--- | :--- |
-| **Lint checks** | Broken (Ajv version mismatch) | Passed with 0 errors | 🟢 PASS |
-| **TypeScript Compilation** | Error on `route.spec.ts` | Complete type-safe builds | 🟢 PASS |
-| **Production Server** | Inaccessible | Serving on port 3000 with secure headers | 🟢 PASS |
-| **Playwright E2E** | Failing (No browser / server) | 100% Green E2E certification run | 🟢 PASS |
-| **Database Sync** | Unchecked schema push | Native Postgres 16 syncing & seed validation | 🟢 PASS |
+### Harmless / Non-Blocking
+1. `MODULE_TYPELESS_PACKAGE_JSON` warning:
+   - *Description*: Warnings stating next.config.js is reparsing as ES Module.
+   - *Impact*: Low. Represents a minor performance overhead during compilation, does not affect production execution.
+2. `unexpected export *` warning regarding `@prisma/client`:
+   - *Description*: Next.js Turbopack warning during compilation concerning CJS exports from `@prisma/client`.
+   - *Impact*: Low. Handled gracefully by Turbopack build layers.
+
+### recommended cleanup
+1. Deprecated Next.js `middleware` convention:
+   - *Description*: Recommendation to migrate from Next.js `middleware.ts` to `proxy` config if appropriate.
+   - *Impact*: Currently does not affect runtime capabilities, but recommended for Next.js 17 alignment.
+
+### Release Blocker
+1. `You are using the default secret. Please set BETTER_AUTH_SECRET`:
+   - *Description*: Better Auth initialization crashes if `BETTER_AUTH_SECRET` is unset or default when `NODE_ENV=production`.
+   - *Resolution*: Enforced strictly. Vercel dashboard and environment layers must reject builds or initializations that do not provide a strong custom secret.
 
 ---
 
-## 4. Verification Evidence
-- `pnpm lint`: Passed successfully (0 errors)
-- `pnpm typecheck`: Passed successfully (0 errors)
-- `pnpm test`: Passed successfully (0 errors, 26 unit tests green)
-- `pnpm build`: Next.js 16, Docs, and Extension compiled and bundled successfully.
-- `Playwright E2E`: 2 master scenarios run and pass 100% green against local production Next.js server on native PostgreSQL.
+## 3. Production Risks & Mitigation Steps
 
----
-
-## 5. Remaining Risks & Future Recommendations
-- **Neon Cloud Database**: Ensure the production Neon database connection has sslmode enabled and direct/pool strings securely provisioned in Vercel.
-- **Transition to Prisma Migrations**: Since development uses `prisma db push` schema push, plan a transition to standard database migrations (`prisma migrate dev`/`prisma migrate deploy`) prior to launching V1 to prevent risk of accidental table alteration.
+1. **Prisma Client Sync Latency**:
+   - *Risk*: Client discrepancies if schema additions are not generated in Vercel.
+   - *Mitigation*: The `apps/web/package.json` build task explicitly commands `pnpm --filter @wishhub/database db:generate && next build` to guarantee fresh client bindings on every deploy.
+2. **Neon Connection Limits**:
+   - *Risk*: Connection pooling failures on dynamic routes under high traffic spikes.
+   - *Mitigation*: Ensure `DATABASE_URL` targets Neon's pooled endpoint (`-pooler`) and limits standard client pool configurations.

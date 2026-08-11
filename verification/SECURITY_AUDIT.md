@@ -1,48 +1,46 @@
 # Security Audit Report
 
-## 1. Executive Summary & Security Profile
-WishHub enforces strict security practices. Data access is zero-trust, meaning all data is resolved via authenticated session states, and client-supplied user IDs are never trusted for authorization checks.
+## 1. Authentication Configuration Audit
 
-This audit reviews secret hygiene, OWASP Top 10 vectors, session management, and rate limiting controls. Our team has verified that the application operates in a completely secure, hard-isolated state.
-
----
-
-## 2. SSRF (Server-Side Request Forgery) Defense Review
-
-Because the backend features a remote metadata extraction endpoint (`/api/products/extract`), it is a critical target for SSRF vectors. We have verified the following multi-tier defenses inside `apps/web/app/api/products/extract/route.ts`:
-
-1. **Protocol Restriction**: Only URLs starting with `http://` or `https://` are processed. Other schemes (e.g. `ftp://`, `file://`, `gopher://`) are immediately blocked by a Zod schema refiner.
-2. **Static Hostname Blacklist**: Immediate static rejection of loopback and local hostnames: `localhost`, `localhost.localdomain`, `0.0.0.0`, `[::1]`, and hostnames ending in `.local`.
-3. **DNS Resolution Check**: Performs asynchronous lookup via `dns.lookup` to retrieve the target destination's resolved IP address. Rejects target URLs that fail to resolve.
-4. **IP Address Blacklist**: Validates the resolved IP against private, loopback, link-local, broadcast, anycast, and unspecified ranges:
-   - Loopback: `127.0.0.0/8` and `::1`
-   - Private RFC1918: `10.0.0.0/8`, `172.16.0.0/12`, and `192.168.0.0/16`
-   - Link-local: `169.254.0.0/16` and `fe80::/10`
-   - Unspecified/broadcast/multicast: `0.0.0.0`, `::`, and `>=224.0.0.0`
-5. **Fetch Timeout and Size Quotas**: Implements a strict `10s` network request abort signal and limits the retrieved HTML size to `5MB` to prevent resource starvation or infinite stream exploits.
-
-Additionally, this endpoint is wrapped inside `withApiHandler` and requires a valid session to execute. Any unauthenticated anonymous requests are blocked with `401 Unauthorized` before any network parsing takes place.
+- **Authoritative Platform**: Better Auth has been successfully established as the single authoritative V1 authentication provider.
+- **Supabase Auth Cleanup**: Supabase Auth integration elements have been fully isolated or ignored, eliminating duplicate authentication layers in V1.
+- **Secret Constraints**: Better Auth strictly validates session signatures. In production mode, the library actively throws validation errors if `BETTER_AUTH_SECRET` is missing or uses default keys, blocking deployment initialization.
+- **Session Validation**: All requests are checked in `withApiHandler` via `auth.api.getSession({ headers: req.headers })` which safely handles HTTP-only cookies securely.
 
 ---
 
-## 3. Threat Vector Analysis & Mitigation Profiles
+## 2. Authorization & IDOR Mitigations
 
-| Threat Vector | Mitigation Strategy | Status |
-| :--- | :--- | :--- |
-| **Authentication Bypass** | Enforced by secure, HTTP-only cookie-based sessions powered by Better Auth. Unprotected routes/APIs reject unauthorized clients with 401 JSON envelopes. | 🟢 PASS |
-| **Insecure Direct Object References (IDOR)** | No client-supplied user ID is trusted. All data creation, reading, and deletion queries resolve user context strictly from the decrypted cookie session ID. | 🟢 PASS |
-| **SSRF (Server-Side Request Forgery)** | Multi-stage static and resolved-DNS IP blacklist checks block any requests targeting local network, cloud metadata, loopback, or private services. | 🟢 PASS |
-| **Cross-Site Scripting (XSS)** | React's native string interpolation and secure JSDOM scraping prevent unescaped rendering of arbitrary script blocks. | 🟢 PASS |
-| **Denial of Service (DoS)** | Edge-compatible rate limiting layer utilizing a centralized `MemoryRateLimiter` intercepts all requests inside `apps/web/middleware.ts` with custom quota categories. | 🟢 PASS |
+### Codebase Auditing Patterns
+Every user-owned resource route (Wishlists, Products) implements a strict server-side authentication check.
+
+For example, when updating a product in `/api/products/[id]`:
+```typescript
+const savedProduct = await prisma.savedProduct.findUnique({
+  where: { id },
+});
+
+if (!savedProduct || savedProduct.userId !== session.user.id) {
+  return ApiResponse.forbidden('You do not have access to this product');
+}
+```
+1. **Derivation of Ownership**: Clients cannot spoof `userId` parameters because the user context is derived exclusively from the session cookie.
+2. **Strict Matching**: Every mutation and access request verifies `savedProduct.userId === session.user.id` or matching wishlist ownership parameters. IDOR checks strictly return `403 Forbidden` / `404 Not Found` if a user attempts cross-mutations.
 
 ---
 
-## 4. Verification Evidence
-- **Automated Tests**: E2E tests verify that unowned resources and unauthorized mutations return standard `403 Forbidden` / `404 Not Found`. Unauthenticated queries return `401 Unauthorized`.
-- **SSRF Mock Trial**: Statically verified the `isPrivateUrl` helper with standard localhost, loopback, private class C, private class A, and cloud metadata (`169.254.169.254`) IP endpoints—all are correctly rejected.
+## 3. Server-Side Request Forgery (SSRF) Mitigations
 
----
+The URL metadata extraction endpoint (`/api/products/extract`) incorporates multi-tier defense layers to prevent SSRF vulnerabilities:
 
-## 5. Remaining Risks & Future Recommendations
-- **Cloud Secret Scanners**: Configure GitGuardian or gitleaks on public repository pushes to prevent accidental inclusion of production keys (`BETTER_AUTH_SECRET`, `DATABASE_URL`) in local branches.
-- **External API Firewalls**: If hosted on Vercel, utilize Vercel Web Application Firewall (WAF) to further filter bad IP subnets and block malicious bots before reaching the serverless function.
+1. **Protocol Restriction**: Enforced strictly via standard Zod constraints. Only `http://` and `https://` protocols are allowed. Private protocols, FTP, file schemes, and data URIs are rejected instantly.
+2. **DNS Resolution & IP Blacklisting**:
+   - The handler performs DNS lookup on the target hostname using `dns.lookup`.
+   - The resolved IP address is analyzed against standard IPv4 and IPv6 blocklist ranges:
+     - **Loopback**: `127.0.0.0/8`, `::1`, `::`.
+     - **Private RFC1918**: `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`.
+     - **Link-Local**: `169.254.0.0/16`, `fe80::/10`.
+     - **IPv6 Site-Local**: `fc00::/7`, `fd00::/8`.
+     - **Broadcast / Unspecified**: `0.0.0.0`, `224.0.0.0/4`.
+3. **Payload Limit**: HTML retrieval limits raw strings to a maximum of 5MB, protecting server CPU and memory against compression bombs.
+4. **Request Timeout**: Strict 10-second request timeout via `AbortSignal.timeout(10000)` blocks connection exhaustion attacks.
