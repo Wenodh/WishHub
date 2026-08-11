@@ -5,16 +5,16 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url(),
     DIRECT_URL: z.string().url().optional(),
-    BETTER_AUTH_SECRET: z.string().min(1).refine((val) => {
+    NEON_AUTH_BASE_URL: z.string().url(),
+    NEON_AUTH_COOKIE_SECRET: z.string().min(1).refine((val) => {
       if (process.env.NODE_ENV === "production") {
         // Enforce high-entropy minimum length of 32 characters in production to fail fast
         return val.length >= 32;
       }
       return true;
     }, {
-      message: "BETTER_AUTH_SECRET must be at least 32 characters long in production mode.",
+      message: "NEON_AUTH_COOKIE_SECRET must be at least 32 characters long in production mode.",
     }),
-    BETTER_AUTH_URL: z.string().url(),
     STORAGE_BUCKET: z.string().min(1).optional(),
     RESEND_API_KEY: z.string().min(1).optional(),
     EMAIL_FROM: z.string().email().optional(),
@@ -52,8 +52,8 @@ export const env = createEnv({
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
     DIRECT_URL: process.env.DIRECT_URL,
-    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
-    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+    NEON_AUTH_BASE_URL: process.env.NEON_AUTH_BASE_URL,
+    NEON_AUTH_COOKIE_SECRET: process.env.NEON_AUTH_COOKIE_SECRET,
     STORAGE_BUCKET: process.env.STORAGE_BUCKET,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,

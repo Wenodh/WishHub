@@ -174,7 +174,7 @@ Avoid duplicate models and parallel abstractions.
 
 For V1, authentication must remain simple and unified.
 
-**Better Auth is the authoritative authentication platform.**
+**Neon Auth is the authoritative authentication platform.**
 
 Minimum requirements:
 - signup
@@ -186,7 +186,7 @@ Minimum requirements:
 - user ownership checks
 - user isolation
 
-Never build a custom authentication system or introduce duplicate authentication setups when Better Auth already provides the required functionality.
+Never build a custom authentication system or introduce duplicate authentication setups when Neon Auth already provides the required functionality.
 
 ### Unified Authentication & Database Architecture
 
@@ -195,13 +195,13 @@ The application uses **Neon PostgreSQL** as the single, authoritative database f
 ```text
 Next.js
    │
-   ├── Better Auth
+   ├── Neon Auth
    │      │
-   │      └── Prisma
+   │      └── Neon PostgreSQL
    │             │
-   └─────────────┴── Neon PostgreSQL
+   └─────────────┴── Neon PostgreSQL (via Prisma)
                       │
-                      ├── Auth data
+                      ├── Auth data (Neon Auth managed)
                       │   ├── User
                       │   ├── Session
                       │   ├── Account
@@ -214,9 +214,9 @@ Next.js
                           └── CatalogProduct
 ```
 
-The following environment variables are required for a functioning authentication deployment:
-- `BETTER_AUTH_SECRET`
-- `BETTER_AUTH_URL`
+The following environment variables are required for a functioning authentication deployment (Neon Auth):
+- `NEON_AUTH_BASE_URL`
+- `NEON_AUTH_COOKIE_SECRET`
 - `DATABASE_URL`
 
 Agents must never commit secrets. Environment variables belong in environment configuration, never source code.
