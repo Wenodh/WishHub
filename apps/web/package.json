@@ -27,7 +27,6 @@
     "@wishhub/ui": "workspace:*",
     "@wishhub/utils": "workspace:*",
     "@wishhub/wishlist": "workspace:*",
-    "better-auth": "^1.6.22",
     "framer-motion": "11.18.2",
     "jsdom": "^29.1.1",
     "lucide-react": "^0.460.0",

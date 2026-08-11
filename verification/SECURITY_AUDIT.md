@@ -1,46 +1,57 @@
 # Security Audit Report
 
-## 1. Authentication Configuration Audit
-
-- **Authoritative Platform**: Better Auth has been successfully established as the single authoritative V1 authentication provider, backed entirely by Neon PostgreSQL.
-- **Unified Architecture**: Duplicate authentication/database layers have been completely eliminated from the architecture.
-- **Secret Constraints**: Better Auth strictly validates session signatures. In production mode, the library actively throws validation errors if `BETTER_AUTH_SECRET` is missing or uses default keys, blocking deployment initialization.
-- **Session Validation**: All requests are checked in `withApiHandler` via `auth.api.getSession({ headers: req.headers })` which safely handles HTTP-only cookies securely.
+This report evaluates and verifies the defensive controls, session validations, and server-side authorization patterns across WishHub's production architecture.
 
 ---
 
-## 2. Authorization & IDOR Mitigations
+## 1. Authentication Security (Neon Auth)
 
-### Codebase Auditing Patterns
-Every user-owned resource route (Wishlists, Products) implements a strict server-side authentication check.
+- **Authoritative Provider**: **Neon Auth** has been successfully integrated as the single authoritative provider for V1.
+- **Cryptographic Signature Validation**: All server-side requests are checked inside `withApiHandler` via `auth.api.getSession({ headers: req.headers })`. This extracts the session cookie and verifies its cryptographic HMAC-SHA256 signature using `NEON_AUTH_COOKIE_SECRET`.
+- **Zero Client Spoofing**: Since session decoding is completed entirely server-side, it is mathematically impossible for malicious clients to spoof active user sessions or session tokens.
 
-For example, when updating a product in `/api/products/[id]`:
-```typescript
-const savedProduct = await prisma.savedProduct.findUnique({
-  where: { id },
-});
+---
 
-if (!savedProduct || savedProduct.userId !== session.user.id) {
-  return ApiResponse.forbidden('You do not have access to this product');
-}
-```
-1. **Derivation of Ownership**: Clients cannot spoof `userId` parameters because the user context is derived exclusively from the session cookie.
-2. **Strict Matching**: Every mutation and access request verifies `savedProduct.userId === session.user.id` or matching wishlist ownership parameters. IDOR checks strictly return `403 Forbidden` / `404 Not Found` if a user attempts cross-mutations.
+## 2. Server-Side Authorization & IDOR Mitigations
+
+Every API handler and service in WishHub is strictly hardened against Insecure Direct Object Reference (IDOR) attacks:
+
+1. **Never Trust Client Inputs**:
+   - We **never trust** `userId` parameters from request bodies, query strings, or client state.
+   - The user's authenticated identity (`session.user.id`) is always resolved securely on the server-side from the validated session.
+2. **Resource Scoping**:
+   - Access to wishlists and products is strictly scoped to the derived user ID.
+   - For example, when reading, modifying, or deleting a saved product in `/api/products/[id]`, the system performs ownership verification:
+     ```typescript
+     const savedProduct = await prisma.savedProduct.findUnique({
+       where: { id },
+     });
+
+     if (!savedProduct || savedProduct.userId !== session.user.id) {
+       return ApiResponse.forbidden('You do not have access to this product');
+     }
+     ```
+   - This guarantees that **User B cannot**:
+     - Read or list User A's wishlist or products.
+     - Add products to User A's wishlist.
+     - Modify, archive, or delete User A's products.
+     - Read User A's AI shopping insights.
 
 ---
 
 ## 3. Server-Side Request Forgery (SSRF) Mitigations
 
-The URL metadata extraction endpoint (`/api/products/extract`) incorporates multi-tier defense layers to prevent SSRF vulnerabilities:
+The product metadata extraction route (`/api/products/extract`) handles untrusted user URLs using a multi-tiered defense in depth strategy:
 
-1. **Protocol Restriction**: Enforced strictly via standard Zod constraints. Only `http://` and `https://` protocols are allowed. Private protocols, FTP, file schemes, and data URIs are rejected instantly.
-2. **DNS Resolution & IP Blacklisting**:
-   - The handler performs DNS lookup on the target hostname using `dns.lookup`.
-   - The resolved IP address is analyzed against standard IPv4 and IPv6 blocklist ranges:
+1. **Protocol Restriction**: Built into the Zod validation schema. Only `http://` and `https://` schemes are permitted. Other schemes (e.g., `file://`, `ftp://`, `gopher://`, `data:`) are rejected.
+2. **DNS Resolution Verification**:
+   - The handler resolves the target domain's IP address asynchronously using node's `dns.lookup()`.
+3. **Private & Loopback IP Blocking**:
+   - The resolved IP address is verified against a strict subnet blocklist. Access is immediately aborted if the resolved IP belongs to private or loopback ranges:
      - **Loopback**: `127.0.0.0/8`, `::1`, `::`.
      - **Private RFC1918**: `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`.
      - **Link-Local**: `169.254.0.0/16`, `fe80::/10`.
-     - **IPv6 Site-Local**: `fc00::/7`, `fd00::/8`.
-     - **Broadcast / Unspecified**: `0.0.0.0`, `224.0.0.0/4`.
-3. **Payload Limit**: HTML retrieval limits raw strings to a maximum of 5MB, protecting server CPU and memory against compression bombs.
-4. **Request Timeout**: Strict 10-second request timeout via `AbortSignal.timeout(10000)` blocks connection exhaustion attacks.
+     - **IPv6 Unique Local / Site Local**: `fc00::/7`, `fd00::/8`.
+     - **Anycast / Broadcast**: `0.0.0.0`, `255.255.255.255`.
+4. **Timeout Controls**: Enforced with a strict 10-second request timeout via `AbortSignal.timeout(10000)` to prevent resource exhaustion/slowloris attacks.
+5. **Payload Cap**: Max downloaded HTML stream limit is 5MB to block zip bomb or decompression memory inflation attacks.

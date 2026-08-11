@@ -38,7 +38,7 @@ export default function PrivacyPage() {
               We collect minimal, necessary details to support product curation and account synchronization:
             </p>
             <ul className="list-disc pl-6 space-y-1">
-              <li><strong>Account Credentials:</strong> Name, Email, and avatar images provided during Better Auth registration.</li>
+              <li><strong>Account Credentials:</strong> Name, Email, and avatar images provided during Neon Auth registration.</li>
               <li><strong>Curation Content:</strong> Target product URLs, titles, store names, prices, and merchant descriptions extracted via our scraper tool.</li>
               <li><strong>Extension Cache:</strong> Local preferences and wishlist ID references stored securely in Chrome storage.</li>
             </ul>
