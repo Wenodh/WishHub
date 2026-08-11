@@ -5,17 +5,16 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url(),
     DIRECT_URL: z.string().url().optional(),
-    BETTER_AUTH_SECRET: z.string().min(1).refine((val) => {
+    NEON_AUTH_BASE_URL: z.string().url(),
+    NEON_AUTH_COOKIE_SECRET: z.string().min(1).refine((val) => {
       if (process.env.NODE_ENV === "production") {
         // Enforce high-entropy minimum length of 32 characters in production to fail fast
         return val.length >= 32;
       }
       return true;
     }, {
-      message: "BETTER_AUTH_SECRET must be at least 32 characters long in production mode.",
+      message: "NEON_AUTH_COOKIE_SECRET must be at least 32 characters long in production mode.",
     }),
-    BETTER_AUTH_URL: z.string().url(),
-    SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
     STORAGE_BUCKET: z.string().min(1).optional(),
     RESEND_API_KEY: z.string().min(1).optional(),
     EMAIL_FROM: z.string().email().optional(),
@@ -44,8 +43,6 @@ export const env = createEnv({
       .default("false"),
   },
   client: {
-    NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_APP_URL: z.string().url(),
     NEXT_PUBLIC_APP_NAME: z.string().default("WishHub"),
     NEXT_PUBLIC_EXTENSION_ID: z.string().min(1).optional(),
@@ -55,9 +52,8 @@ export const env = createEnv({
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
     DIRECT_URL: process.env.DIRECT_URL,
-    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
-    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    NEON_AUTH_BASE_URL: process.env.NEON_AUTH_BASE_URL,
+    NEON_AUTH_COOKIE_SECRET: process.env.NEON_AUTH_COOKIE_SECRET,
     STORAGE_BUCKET: process.env.STORAGE_BUCKET,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
@@ -70,8 +66,6 @@ export const env = createEnv({
     FEATURE_PRICE_TRACKING: process.env.FEATURE_PRICE_TRACKING,
     FEATURE_NOTIFICATIONS: process.env.FEATURE_NOTIFICATIONS,
     FEATURE_PUBLIC_WISHLISTS: process.env.FEATURE_PUBLIC_WISHLISTS,
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     NEXT_PUBLIC_EXTENSION_ID: process.env.NEXT_PUBLIC_EXTENSION_ID,

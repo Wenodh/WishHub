@@ -90,7 +90,6 @@ Server and client-side configurations are strictly defined and validated at appl
 *   `DIRECT_URL` (Optional, must be valid URL): Direct connection string used to bypass pooling during migrate/push operations.
 *   `BETTER_AUTH_SECRET` (Required): Secret key used to encrypt and sign Better Auth cookies.
 *   `BETTER_AUTH_URL` (Required, must be valid URL): Canonical URL of the deployed application API gateway.
-*   `SUPABASE_SERVICE_ROLE_KEY` (Optional/Historical): Previously used for Supabase integration.
 
 #### Client-Side Environment Variables
 *   `NEXT_PUBLIC_APP_URL` (Required): Public frontend URL of the Next.js application.
@@ -130,7 +129,7 @@ Server and client-side configurations are strictly defined and validated at appl
 *   **Impact**: Altering tables in production via `db:push` can lead to accidental data loss or drift. There is no version-controlled record of SQL modifications over time.
 
 ### 3. Shared Preview Environment Database (Severity: Medium)
-*   **Evidence**: Setup guide assumes sharing the single Supabase instance.
+*   **Evidence**: Setup guide assumes sharing the single Neon PostgreSQL database instance.
 *   **Impact**: Preview branches executing `db:push` can alter the production database schema destructively, or preview test-runs can pollute production user data.
 
 ### 4. Empty Seeding Script (Severity: Low)
