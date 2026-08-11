@@ -26,10 +26,8 @@ A complete audit of environment variables configured across the WishHub reposito
 - `STORAGE_BUCKET`: Storage bucket identifier.
 - `FCM_PROJECT_ID`: Firebase project identifier.
 
-### Category D: Obsolete Variables
-- `NEXT_PUBLIC_SUPABASE_URL`: Unused. Supabase Auth is deprecated.
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Unused. Supabase Auth is deprecated.
-- `SUPABASE_SERVICE_ROLE_KEY`: Unused. Supabase Auth is deprecated.
+### Category D: Obsolete Variables (Fully Removed)
+All obsolete Supabase environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) have been fully deleted from the configuration, schemas, and documentation.
 
 ---
 

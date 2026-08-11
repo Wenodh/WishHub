@@ -16,9 +16,7 @@ graph TD
     end
 
     subgraph "Infrastructure Layer"
-        DB[packages/database - Prisma]
-        STR[packages/storage - Supabase]
-        RT[packages/realtime - Supabase]
+        DB[packages/database - Prisma / Neon PostgreSQL]
         AUTH[packages/auth - Better Auth]
         ENV[packages/env - t3-env]
         TEL[packages/telemetry]

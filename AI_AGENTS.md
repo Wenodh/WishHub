@@ -186,7 +186,33 @@ Minimum requirements:
 - user ownership checks
 - user isolation
 
-Never build a custom authentication system or introduce duplicate authentication setups when Better Auth already provides the required functionality. Ensure there is no active Supabase Auth layer running in parallel.
+Never build a custom authentication system or introduce duplicate authentication setups when Better Auth already provides the required functionality.
+
+### Unified Authentication & Database Architecture
+
+The application uses **Neon PostgreSQL** as the single, authoritative database for both authentication and application data.
+
+```text
+Next.js
+   │
+   ├── Better Auth
+   │      │
+   │      └── Prisma
+   │             │
+   └─────────────┴── Neon PostgreSQL
+                      │
+                      ├── Auth data
+                      │   ├── User
+                      │   ├── Session
+                      │   ├── Account
+                      │   └── Verification
+                      │
+                      └── Application data
+                          ├── Wishlist
+                          ├── WishlistItem
+                          ├── SavedProduct
+                          └── CatalogProduct
+```
 
 The following environment variables are required for a functioning authentication deployment:
 - `BETTER_AUTH_SECRET`

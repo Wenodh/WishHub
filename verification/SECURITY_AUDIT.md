@@ -2,8 +2,8 @@
 
 ## 1. Authentication Configuration Audit
 
-- **Authoritative Platform**: Better Auth has been successfully established as the single authoritative V1 authentication provider.
-- **Supabase Auth Cleanup**: Supabase Auth integration elements have been fully isolated or ignored, eliminating duplicate authentication layers in V1.
+- **Authoritative Platform**: Better Auth has been successfully established as the single authoritative V1 authentication provider, backed entirely by Neon PostgreSQL.
+- **Unified Architecture**: Duplicate authentication/database layers have been completely eliminated from the architecture.
 - **Secret Constraints**: Better Auth strictly validates session signatures. In production mode, the library actively throws validation errors if `BETTER_AUTH_SECRET` is missing or uses default keys, blocking deployment initialization.
 - **Session Validation**: All requests are checked in `withApiHandler` via `auth.api.getSession({ headers: req.headers })` which safely handles HTTP-only cookies securely.
 

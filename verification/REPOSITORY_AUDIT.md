@@ -23,10 +23,8 @@ WishHub is organized as a Turborepo monorepo with explicit package scope separat
 │   ├── feature-flags/     # Feature toggle parameters
 │   ├── jobs/              # Background schedulers & cron processing
 │   ├── notifications/     # Messaging pipelines
-│   ├── real-time/         # Realtime sync primitives
 │   ├── scraper/           # Page extraction core and adapters (Amazon, JSON-LD)
 │   ├── sdk/               # Universal TS client wrapper
-│   ├── storage/           # Supabase object storage upload helpers
 │   ├── telemetry/         # Logging wrappers, metrics, and Console loggers
 │   ├── types/             # Common model interfaces
 │   ├── ui/                # Shared Tailwind styling and Radix elements
