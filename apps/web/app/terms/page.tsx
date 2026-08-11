@@ -35,7 +35,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-lg font-extrabold text-neutral-950 dark:text-white">2. Beta Usage & Registration</h2>
             <p>
-              WishHub is currently in a public beta stage. We offer our curation services free during this launch period. To access certain dashboard and collection features, you must complete account registration. You agree to safeguard your Better Auth sessions and credentials.
+              WishHub is currently in a public beta stage. We offer our curation services free during this launch period. To access certain dashboard and collection features, you must complete account registration. You agree to safeguard your Neon Auth sessions and credentials.
             </p>
           </section>
 

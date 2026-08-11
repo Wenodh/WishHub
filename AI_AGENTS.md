@@ -15,7 +15,7 @@ The fundamental user journey must work reliably:
 ```text
 User
  ↓
-Authenticate (Better Auth)
+Authenticate (Neon Auth)
  ↓
 Create/select wishlist
  ↓
@@ -103,7 +103,7 @@ Agents must not work on lower-priority tiers while higher tiers contain known br
 
 ```text
 P0 — Core Wishlist
-    Authentication (Better Auth)
+    Authentication (Neon Auth)
     Wishlists (CRUD, Default list)
     Add product (URL & Manual override)
     View products
@@ -540,7 +540,7 @@ When no explicit task is provided, agents should prioritize the following order:
 
 ```text
 1. Broken core functionality
-2. Authentication / authorization (Better Auth Setup)
+2. Authentication / authorization (Neon Auth Setup)
 3. Add-to-wishlist flow (with manual form override)
 4. Wishlist CRUD
 5. Product CRUD
@@ -562,7 +562,7 @@ When no explicit task is provided, agents should prioritize the following order:
 Document the future roadmap but do not implement it unless explicitly requested:
 
 ```text
-V1: Universal Wishlist (Core, Manual Form, Better Auth)
+V1: Universal Wishlist (Core, Manual Form, Neon Auth)
   │
   └── V1.1: AI Shopping Intelligence (On-demand insights, strict guardrails)
         │
