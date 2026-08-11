@@ -3,13 +3,13 @@
 ## 1. Executive Summary
 This report presents a comprehensive, read-only audit of WishHub's database and persistence layer architecture. All findings are derived statically from the codebase, environment variable configuration, schema files, documentation, and authentication configurations in the workspace.
 
-Overall, the data architecture follows clean domain-driven principles (specifically separating global Product extraction from private user-specific Saves). However, a **critical risk** has been identified in the **Better Auth integration**: the Prisma schema defines a custom `User` table but lacks the standard schema models/tables (like `Session`, `Account`, and `Verification`) required by Better Auth's `prismaAdapter`. This will lead to runtime failures when attempting to register, log in, or retrieve auth sessions.
+Overall, the data architecture follows clean domain-driven principles (specifically separating global Product extraction from private user-specific Saves). The Better Auth integration has been fully resolved; standard models/tables (like `Session`, `Account`, and `Verification`) are correctly implemented in the Prisma schema, and persistence works completely.
 
 ---
 
 ## 2. Database Provider
 *   **Active Database Provider**: PostgreSQL.
-*   **Intended Host**: **Supabase** (as verified by references in `docs/DATABASE.md`, `docs/DEPLOYMENT.md`, and Supabase-specific environment variables in `@wishhub/env`).
+*   **Intended Host**: **Neon in production** (or PostgreSQL locally).
 *   **Database Initializer**: `packages/database/src/index.ts`.
     *   It instantiates a singleton `PrismaClient` and exports the `prisma` client.
     *   In development and preview modes (`process.env.NODE_ENV !== "production"`), it binds the client instance to the NodeJS global context object (`globalThis.prisma`) to prevent connection pool exhaustion during Next.js hot-reloads.
@@ -86,15 +86,13 @@ Server and client-side configurations are strictly defined and validated at appl
 ### Required Variables Checklist
 
 #### Server-Side Environment Variables
-*   `DATABASE_URL` (Required, must be valid URL): Supabase connection pool string for database operations.
+*   `DATABASE_URL` (Required, must be valid URL): PostgreSQL connection pool string for database operations.
 *   `DIRECT_URL` (Optional, must be valid URL): Direct connection string used to bypass pooling during migrate/push operations.
 *   `BETTER_AUTH_SECRET` (Required): Secret key used to encrypt and sign Better Auth cookies.
 *   `BETTER_AUTH_URL` (Required, must be valid URL): Canonical URL of the deployed application API gateway.
-*   `SUPABASE_SERVICE_ROLE_KEY` (Required): Secret key for Supabase administrative operations.
+*   `SUPABASE_SERVICE_ROLE_KEY` (Optional/Historical): Previously used for Supabase integration.
 
 #### Client-Side Environment Variables
-*   `NEXT_PUBLIC_SUPABASE_URL` (Required): Public gateway URL for Supabase bucket assets/storage.
-*   `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Required): Public anonymous key for Supabase asset access.
 *   `NEXT_PUBLIC_APP_URL` (Required): Public frontend URL of the Next.js application.
 
 ### Sandbox Fallbacks & Dev Defaults
@@ -200,7 +198,7 @@ Server and client-side configurations are strictly defined and validated at appl
     *   Create a baseline migration.
     *   Commit generated SQL migration scripts into the repository in `packages/database/prisma/migrations`.
 3.  **Isolate Preview Databases**:
-    Configure Vercel Environment Variable Scopes to provide distinct `DATABASE_URL` configurations for Production and Preview branches. Consider utilizing Supabase's database branching feature or separate Neon/local PostgreSQL dev instances.
+    Configure Vercel Environment Variable Scopes to provide distinct `DATABASE_URL` configurations for Production and Preview branches. Consider utilizing Neon's database branching feature or separate local PostgreSQL dev instances.
 
 ### Severity: Low
 4.  **Implement `scripts/seed.ts`**:

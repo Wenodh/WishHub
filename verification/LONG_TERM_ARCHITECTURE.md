@@ -21,7 +21,7 @@ graph TD
     event_bus --> ai_service[AI Analytics & Taxonomy Service]
 
     %% Databases
-    scraper_service --> pg_pool[Supabase PostgreSQL Replica Pool]
+    scraper_service --> pg_pool[PostgreSQL Replica Pool / Neon Branch]
     notification_service --> pg_pool
     ai_service --> vector_db[Pinecone Vector Database]
 ```

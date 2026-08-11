@@ -6,7 +6,7 @@ Welcome to WishHub! This guide will help you set up your local development envir
 
 - **Node.js**: >= 20 (Node 22 recommended)
 - **pnpm**: >= 9.x
-- **Docker**: For local PostgreSQL (optional, can use Supabase)
+- **Docker**: For local PostgreSQL (optional, can use a Neon branch or separate remote PostgreSQL instance)
 
 ## Local Setup
 

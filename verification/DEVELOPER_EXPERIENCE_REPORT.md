@@ -10,7 +10,7 @@ The developer onboarding process is detailed in `docs/ONBOARDING.md` and provide
 ## 2. Dev Experience Gaps & Recommendations
 
 ### A. Missing Local Docker Compose Configuration
-- **Current**: Developers must connect to a remote Supabase instance or manually configure a local PostgreSQL database.
+- **Current**: Developers must connect to a remote Neon / PostgreSQL database or manually configure a local PostgreSQL database.
 - **Proposed**: Provide a root `docker-compose.yml` file containing pre-configured PostgreSQL and Redis instances.
 - **Impact**: Enables new developers to spinning up a fully functional local development environment with a single command (`docker compose up -d`).
 - **Effort**: Low (1 day) | **Risk**: Low

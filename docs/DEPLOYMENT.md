@@ -4,11 +4,9 @@
 The web dashboard and API are designed for deployment on **Vercel**.
 1. Connect the repository to Vercel.
 2. Configure the following environment variables:
-    - `DATABASE_URL` (Supabase connection string)
+    - `DATABASE_URL` (PostgreSQL/Neon connection string)
     - `BETTER_AUTH_SECRET`
     - `BETTER_AUTH_URL` (Full URL of the deployed app)
-    - `NEXT_PUBLIC_SUPABASE_URL`
-    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 3. Vercel will automatically detect the Turborepo workspace and build `apps/web`.
 
 ## Documentation (Fumadocs)

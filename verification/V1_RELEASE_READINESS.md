@@ -15,7 +15,7 @@ WishHub has officially graduated to the production-ready **Version 1.0 Release**
 | **Static Pages** | Ready | 10/10 | Responsive features, FAQ, Privacy, Terms, and Contact forms. |
 | **Extension** | Ready | 10/10 | Seamlessly integrates and queries duplicates. |
 | **AI Insights** | Ready | 10/10 | Multi-provider abstraction (Mock/OpenAI) with deterministic fallback. |
-| **Database** | Ready | 10/10 | Active Supabase schema with full cascading deletes. |
+| **Database** | Ready | 10/10 | Active Neon PostgreSQL schema with full cascading deletes. |
 | **Testing** | Ready | 10/10 | 100% of Vitest unit & integration tests passing green. |
 
 ---

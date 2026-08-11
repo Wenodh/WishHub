@@ -5,7 +5,15 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url(),
     DIRECT_URL: z.string().url().optional(),
-    BETTER_AUTH_SECRET: z.string().min(1),
+    BETTER_AUTH_SECRET: z.string().min(1).refine((val) => {
+      if (process.env.NODE_ENV === "production") {
+        // Enforce high-entropy minimum length of 32 characters in production to fail fast
+        return val.length >= 32;
+      }
+      return true;
+    }, {
+      message: "BETTER_AUTH_SECRET must be at least 32 characters long in production mode.",
+    }),
     BETTER_AUTH_URL: z.string().url(),
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
     STORAGE_BUCKET: z.string().min(1).optional(),

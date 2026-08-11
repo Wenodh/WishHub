@@ -49,4 +49,4 @@ The `User` database model maps directly to Better Auth requirements:
 
 ## 4. Entity Scalability Assessment
 The schema design scales well. However, because we use a development-only push workflow (`prisma db push`), there are no standard migration script files in the codebase.
-- **Scale Blocker**: Executing direct push operations against live production environments (e.g. Supabase) without a formal migration verification step presents significant data loss risks. We must implement a migration safety policy before onboarding a high volume of users.
+- **Scale Blocker**: Executing direct push operations against live production environments (e.g. Neon) without a formal migration verification step presents significant data loss risks. We must implement a migration safety policy before onboarding a high volume of users.
