@@ -1,24 +1,24 @@
-# Known Limitations (WishHub v1.0)
+# Known Limitations & Deferred Capabilities
 
-## 1. Context
-While WishHub v1.0 is a highly polished commercial-grade SaaS product, certain architectural boundaries are defined to prevent scope creep and maintain absolute stability.
+This document chronicles known development limitations, deferred features, and environmental blocks identified during the V1 release cycle:
 
----
+## 1. Environmental & Testing Blocks
 
-## 2. Platform & Scraper Limits
-- **Anti-Bot Defenses**: While our `@wishhub/scraper` core utilizes standard parsing and schema extraction techniques, heavily fortified merchant sites (e.g. Amazon when triggered by high-volume scraping bursts) may occasionally request CAPTCHAs.
-- **Client-Side SPA Renderers**: Obscure shopping websites built with JavaScript frameworks that do not use Server-Side Rendering (SSR) might not render prices inside the initial static HTML, meaning we fallback to DOM heuristics.
-
----
-
-## 3. Scope Boundaries (Post-V1.0 Roadmap)
-- **Background Cron Jobs**: Automated 24/7 cron price checks are scheduled for Version 1.1 (ADR 004). Version 1.0 utilizes robust, secure on-demand catalog scraping upon saves or manual refreshes.
-- **FCM Web Push Alerts**: Browser-level push alerts are out of scope for the current launch and will be introduced alongside cron execution.
-- **Export/Import Portability**: Direct imports of CSV collections from other custom wishlists are out of scope for the initial release.
+1. **Local PostgreSQL Sandbox Restrictions**:
+   - *Detail*: There is no local PostgreSQL server installed on the system, and running PostgreSQL inside local alpine-based Docker containers is blocked due to containerization overlayfs mount privileges.
+   - *Impact*: Direct automated database integration and Playwright browser E2E test runs could not be executed locally. They are marked as `BLOCKED` in certification reports.
+   - *Resolution*: Full verification of schema, build, lint, types, and unit tests has been completed. Live PostgreSQL integration verification must be completed in the Vercel/Neon staging branch.
+2. **Chrome Extension Runtime Limitations**:
+   - *Detail*: Built browser extension artifacts are fully packaged, optimized, and stylesheet CSS bundles are verified. However, live runtime popup execution and alarm sync checks are restricted due to headless sandbox limitations.
+   - *Impact*: Extension runtime testing is marked as `BLOCKED`.
 
 ---
 
-## 4. Remediation & Fail-safes
-To preserve user confidence when scrapers fail to extract particular values:
-1. **Interactive Product Card Editing**: Users can manually modify, adjust, or override product titles, descriptions, and pricing fields directly in the UI.
-2. **Deterministic Fallbacks**: Scrapers automatically degrade gracefully, falling back to JSON-LD, OpenGraph tags, or page meta headers before reporting field errors.
+## 2. Deferred Capabilities (P2/P3 Roadmap)
+
+1. **Synchronous AI Insights Execution**:
+   - *Detail*: Saved products currently enqueue job records inside the `AIJob` queue. Synchronous processing requires periodic queue cron triggers.
+   - *Impact*: Cron triggers are deferred. AI Insights process on-demand in milliseconds when requested, degrading gracefully to standard blank states if disabled.
+2. **Price Tracking Scheduler**:
+   - *Detail*: Continuous tracking and automated notification dispatcher pipelines are fully designed but require a long-running dispatcher background service.
+   - *Impact*: Price history logging is inactive in local test scopes, presenting as a future V1.2 integration item.
