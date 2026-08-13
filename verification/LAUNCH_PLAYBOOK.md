@@ -12,9 +12,9 @@ Before initiating any deployment, the following verification commands must run 1
 pnpm install
 
 # 2. Generate database prisma client
-pnpm --filter @wishhub/database exec prisma generate
+pnpm --filter @wishhub/database db:generate
 
-# 3. Validate typescript types across all 26 packages
+# 3. Validate typescript types across all packages
 pnpm run typecheck
 
 # 4. Check lint compliance
@@ -59,19 +59,19 @@ To safely synchronize database schemas without risking data loss:
 
 ## 3. Platform Deployment Setup
 
-### Step A: Better Auth Production Requirements
+### Step A: Neon Auth Production Requirements
 Before starting the Next.js server on Vercel, ensure the following environment variables are securely configured in the Vercel Dashboard:
 
-1. `BETTER_AUTH_SECRET`:
-   - Must be a high-entropy string generated with:
+1. `NEON_AUTH_COOKIE_SECRET`:
+   - Must be a high-entropy string of at least 32 characters, generated with:
      ```bash
      openssl rand -base64 32
      ```
    - **Never use or fall back to default development secrets in production.**
-2. `BETTER_AUTH_URL`:
+2. `NEON_AUTH_BASE_URL`:
    - Set to the canonical production domain (e.g., `https://wishhub.com`).
 3. `DATABASE_URL`:
-   - Set to the pooling Neon connection string (use connection pool port/param `-pooler` if necessary).
+   - Set to the pooling Neon connection string.
 4. `DIRECT_URL`:
    - Set to the direct Neon non-pooling connection string.
 

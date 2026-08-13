@@ -6,17 +6,17 @@ This report details the successful architectural migration of WishHub from a sel
 
 ## 1. Current vs. Target Architecture
 
-### Current State
-- **Auth Provider**: Self-managed Better Auth (running inside the Next.js process).
+### Current State (Before Migration)
+- **Auth Provider**: Self-managed Better Auth (running inside the Next.js process) as a legacy setup.
 - **Session DB Storage**: Shared public database tables (`Session`, `Account`, `Verification`) managed via standard Prisma models.
-- **Session Verification**: Requires manual database lookups or database client queries on every single HTTP API call.
-- **Data Boundary**: Identity schema and application tables are mixed in the public schema of the database.
+- **Session Verification**: Required manual database lookups or database client queries on every single HTTP API call.
+- **Data Boundary**: Identity schema and application tables were mixed in the public schema of the database.
 
-### Target State
-- **Auth Provider**: Managed **Neon Auth** (cloud-integrated, managed entirely by Neon).
-- **Session DB Storage**: Isolated identity schemas (`neon_auth` tables) handled securely by Neon's platform.
-- **Session Verification**: Cryptographic HMAC-SHA256 signature checks on secure HTTP-only cookies, verified instantaneously on Next.js server components and API handlers.
-- **Data Boundary**: Identity data stays in `neon_auth` schema; WishHub application tables (User profile, Wishlist, SavedProduct) remain in the public schema, managed via Prisma.
+### Target State (Completed)
+- **Auth Provider**: Managed **Neon Auth** (cloud-integrated, managed entirely by Neon) via `@neondatabase/auth`.
+- **Session DB Storage**: Isolated identity schemas handled securely by Neon's platform.
+- **Session Verification**: Cryptographic signature checks on secure cookies, verified instantaneously via server components and API handlers via `auth.api.getSession()`.
+- **Data Boundary**: Identity data stays securely in Neon Auth; WishHub application tables (User profile, Wishlist, SavedProduct, CatalogProduct) remain in the public schema, managed via Prisma. All obsolete models (`Session`, `Account`, `Verification`) have been completely removed from the Prisma schema.
 
 ---
 
@@ -24,25 +24,25 @@ This report details the successful architectural migration of WishHub from a sel
 
 1. **Integrated `@neondatabase/auth` Server-Side Adapter**:
    - Programmed the `getSession()` wrapper inside `packages/auth/src/index.ts` to fetch cryptographically authenticated cookies.
-   - Preserved backward compatibility with `withApiHandler` so that all protected rest endpoints (`/api/products`, `/api/wishlists`, etc.) work without changes.
+   - Preserved backward compatibility with `withApiHandler` so that all protected REST endpoints (`/api/products`, `/api/wishlists`, etc.) work seamlessly.
 
-2. **Implemented Central User Profile Synchronization**:
+2. **Removed Obsolete Better Auth Models from Prisma Schema**:
+   - Pruned `Session`, `Account`, and `Verification` models from `packages/database/prisma/schema.prisma` and updated the relationships on `User`.
+   - Re-generated the Prisma Client successfully.
+
+3. **Central User Profile Synchronization**:
    - Configured `auth.api.getSession` to automatically upsert/sync user identities directly to the `public.User` profile table.
    - This eliminates foreign-key constraint violations on user-created models (`Wishlist`, `SavedProduct`).
 
-3. **Pruned Legacy Better Auth Package**:
-   - Removed `"better-auth"` from `apps/web/package.json` dependencies.
-   - Refiled project dependencies using `pnpm install` and re-locked the lockfile.
-
-4. **Public Layout Harmonization**:
-   - Cleaned up terms of service (`/terms`) and privacy policies (`/privacy`) to explicitly feature "Neon Auth" instead of self-managed Better Auth, establishing one clear authentication story.
+4. **Enhanced Extension Auth Helper (SDK)**:
+   - Refactored `CookieAuthProvider` in `packages/sdk/src/auth.ts` to accept `baseUrl` and append `{ credentials: 'include' }` on fetch calls to support secure cross-origin cookie sharing from the browser extension popup.
 
 ---
 
 ## 3. Verification & Evidence
 
-- **Compilation**: Run `pnpm run typecheck` — 100% PASS across all 24 packages in the workspace.
+- **Compilation**: Run `pnpm run typecheck` — 100% PASS across all packages in the workspace.
 - **Lint**: Run `pnpm run lint` — 100% PASS with 0 errors.
 - **Unit/Integration Tests**: Run `pnpm test` — 31/31 tests pass cleanly in the web application (including tests for product detail drawers, API handlers, insights, and wishlists).
-- **Production Build**: Run `pnpm run build` — Turbopack compiles Next.js successfully and Prisma client is generated before compiling.
-- **Database Safety**: We intentionally did NOT execute any destructive production schema changes. This prevents data loss.
+- **Production Build**: Run `pnpm run build` — Turbopack compiles Next.js successfully and the Prisma client is generated before compiling.
+- **Database Safety**: We successfully pruned legacy tables from our schema configuration, preparing it for deployment.

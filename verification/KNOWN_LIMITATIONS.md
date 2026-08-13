@@ -14,7 +14,14 @@ This document chronicles known development limitations, deferred features, and e
 
 ---
 
-## 2. Deferred Capabilities (P2/P3 Roadmap)
+## 2. Browser Extension Cookie Isolation Details
+
+- **Third-Party Cookie Restraints**: Popups rendered inside browser extensions run on the `chrome-extension://` origin. By default, browser cookie-isolation policies block the transmission of host session cookies on cross-origin requests.
+- **Remediation**: The `WishHubSDK` now passes `{ credentials: 'include' }` on all session and API requests. For production extension deployment, the extension manifest's `host_permissions` must specify the target API domain (e.g., `https://wishhub.app/*`) so that Chrome will permit sharing authenticated session cookies.
+
+---
+
+## 3. Deferred Capabilities (P2/P3 Roadmap)
 
 1. **Synchronous AI Insights Execution**:
    - *Detail*: Saved products currently enqueue job records inside the `AIJob` queue. Synchronous processing requires periodic queue cron triggers.
