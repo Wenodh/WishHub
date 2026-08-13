@@ -7,8 +7,9 @@ This report evaluates and verifies the defensive controls, session validations, 
 ## 1. Authentication Security (Neon Auth)
 
 - **Authoritative Provider**: **Neon Auth** has been successfully integrated as the single authoritative provider for V1.
-- **Cryptographic Signature Validation**: All server-side requests are checked inside `withApiHandler` via `auth.api.getSession({ headers: req.headers })`. This extracts the session cookie and verifies its cryptographic HMAC-SHA256 signature using `NEON_AUTH_COOKIE_SECRET`.
+- **Cryptographic Signature Verification**: All server-side requests are checked inside `withApiHandler` via `auth.api.getSession({ headers: req.headers })`. This extracts the session cookie and verifies its cryptographic HMAC-SHA256 signature using `NEON_AUTH_COOKIE_SECRET`.
 - **Zero Client Spoofing**: Since session decoding is completed entirely server-side, it is mathematically impossible for malicious clients to spoof active user sessions or session tokens.
+- **No Legacy Models**: Obsolete legacy authentication tables (`Session`, `Account`, `Verification`) have been fully deleted from the Prisma schema, decoupling the public application schema from managed identities.
 
 ---
 

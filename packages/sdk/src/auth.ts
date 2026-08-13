@@ -4,14 +4,31 @@ export interface AuthProvider {
 }
 
 export class CookieAuthProvider implements AuthProvider {
+  private baseUrl: string;
+
+  constructor(baseUrl?: string) {
+    this.baseUrl = baseUrl || '';
+  }
+
   async getSession() {
-    // For vertical slice, we rely on the browser's automatic cookie handling
-    const res = await fetch('/api/auth/get-session');
-    if (!res.ok) return { user: null };
-    return res.json();
+    // Append the baseUrl if present, and add credentials: 'include' for cross-origin extension requests
+    const url = this.baseUrl ? `${this.baseUrl}/api/auth/get-session` : '/api/auth/get-session';
+    try {
+      const res = await fetch(url, { credentials: 'include' });
+      if (!res.ok) return { user: null };
+      return res.json();
+    } catch (err) {
+      console.error('Failed to get session:', err);
+      return { user: null };
+    }
   }
 
   async signOut() {
-    await fetch('/api/auth/sign-out', { method: 'POST' });
+    const url = this.baseUrl ? `${this.baseUrl}/api/auth/sign-out` : '/api/auth/sign-out';
+    try {
+      await fetch(url, { method: 'POST', credentials: 'include' });
+    } catch (err) {
+      console.error('Failed to sign out:', err);
+    }
   }
 }

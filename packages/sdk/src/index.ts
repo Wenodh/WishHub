@@ -10,7 +10,7 @@ export class WishHubSDK {
   constructor(baseUrl: string, authProvider?: AuthProvider) {
     this.products = new ProductSDK(baseUrl);
     this.wishlists = new WishlistSDK(baseUrl);
-    this.auth = authProvider || new CookieAuthProvider();
+    this.auth = authProvider || new CookieAuthProvider(baseUrl);
   }
 }
 
